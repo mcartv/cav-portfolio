@@ -117,7 +117,9 @@ function InterfacePreview({ project }) {
   )
 }
 
-function ProjectModal({ project, onClose }) {
+function ProjectModal({ selection, onClose }) {
+  const project = selection?.project
+  const sourceRect = selection?.rect
   const closeRef = useRef(null)
   const [phase, setPhase] = useState('flip')
   const reducedMotion = useRef(false)
@@ -153,15 +155,26 @@ function ProjectModal({ project, onClose }) {
   }, [project, onClose])
 
   if (!project) return null
+  const centerX = sourceRect ? sourceRect.left + sourceRect.width / 2 : window.innerWidth / 2
+  const centerY = sourceRect ? sourceRect.top + sourceRect.height / 2 : window.innerHeight / 2
+  const originStyle = {
+    '--source-offset-x': (centerX - window.innerWidth / 2) + 'px',
+    '--source-offset-y': (centerY - window.innerHeight / 2) + 'px',
+  }
   return (
-    <div className={'project-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 sm:p-8 ' + (phase === 'expanded' ? 'overlay-expanded' : 'overlay-flip')} onPointerDown={e => { if (e.target === e.currentTarget) onClose() }}>
+    <div style={originStyle} className={'project-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 sm:p-8 ' + (phase === 'expanded' ? 'overlay-expanded' : 'overlay-flip')} onPointerDown={e => { if (e.target === e.currentTarget) onClose() }}>
       {phase === 'flip' ? (
-        <div className="flip-stage" aria-hidden="true">
+        <div className="flip-stage" aria-hidden="true" style={sourceRect ? {
+          left: sourceRect.left,
+          top: sourceRect.top,
+          width: sourceRect.width,
+          height: sourceRect.height,
+        } : { left: '50%', top: '50%', width: 280, height: 340, transform: 'translate(-50%, -50%)' }}>
           <div className="flip-object">
-            <div className="flip-face flip-front" style={{backgroundColor:project.color}}>
-              <div className="font-mono text-xs">{project.id} / {project.type}</div>
-              <div className="text-6xl font-black tracking-[-.1em]">{project.mark}<span className="text-signal">.</span></div>
-              <div className="text-2xl font-black tracking-tighter">{project.title}</div>
+            <div className="flip-face flip-front">
+              <div className="flex justify-between gap-2 font-mono text-[8px] sm:text-[10px]"><span>{project.id} / {project.type}</span><span>{project.year}</span></div>
+              <ProjectArtwork project={project}/>
+              <div className="flex items-center justify-between gap-2"><strong className="text-base font-extrabold tracking-tight sm:text-xl">{project.title}</strong><ArrowUpRight size={17}/></div>
             </div>
             <div className="flip-face flip-back">
               <div className="font-mono text-xs">PROJECT FILE / {project.id}</div>
@@ -190,6 +203,13 @@ function Work() {
   const [selected, setSelected] = useState(null)
   const touchStart = useRef(null)
   const closeProject = useCallback(() => setSelected(null), [])
+  const openProject = useCallback((project, element) => {
+    const rect = element?.getBoundingClientRect()
+    setSelected({
+      project,
+      rect: rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : null,
+    })
+  }, [])
   const live = projects[active]
   const move = delta => setActive(current => (current + delta + projects.length) % projects.length)
   const onKey = e => { if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1) } if (e.key === 'ArrowRight') { e.preventDefault(); move(1) } }
@@ -203,7 +223,7 @@ function Work() {
           if (offset > projects.length / 2) offset -= projects.length
           if (offset < -projects.length / 2) offset += projects.length
           const distance = Math.abs(offset)
-          return <button key={project.id} type="button" className="project-card absolute left-1/2 top-3 flex h-[285px] w-[220px] -translate-x-1/2 flex-col gap-2 border border-ink bg-[#faf9f4] p-2 text-left shadow-xl sm:top-5 sm:h-[370px] sm:w-[320px] sm:p-3" style={{ '--offset':offset, '--abs':distance, zIndex:20-distance, opacity:distance > 1 ? 0.24 : 1, pointerEvents:distance > 1 ? 'none':'auto', filter:distance > 0 ? 'saturate(.75)' : 'none'}} onClick={() => { if (active === i) setSelected(project); else setActive(i) }} aria-label={active === i ? `Open ${project.title} project details` : `Select ${project.title} project`} aria-current={active===i ? 'true':undefined}>
+          return <button key={project.id} type="button" className="project-card absolute left-1/2 top-3 flex h-[285px] w-[220px] flex-col gap-2 border border-ink bg-[#faf9f4] p-2 text-left shadow-xl sm:top-5 sm:h-[370px] sm:w-[320px] sm:p-3" style={{ '--offset':offset, '--abs':distance, zIndex:20-distance, opacity:selected?.project.id === project.id ? 0 : distance > 1 ? 0.24 : 1, pointerEvents:distance > 1 ? 'none':'auto', filter:distance > 0 ? 'saturate(.75)' : 'none'}} onClick={e => { if (active === i) openProject(project, e.currentTarget); else setActive(i) }} aria-label={active === i ? `Open ${project.title} project details` : `Select ${project.title} project`} aria-current={active===i ? 'true':undefined}>
             <div className="flex justify-between gap-2 font-mono text-[8px] sm:text-[10px]"><span>{project.id} / {project.type}</span><span>{project.year}</span></div>
             <ProjectArtwork project={project}/>
             <div className="flex items-center justify-between gap-2"><strong className="text-base font-extrabold tracking-tight sm:text-xl">{project.title}</strong><ArrowUpRight size={17} strokeWidth={1.4}/></div>
@@ -212,11 +232,11 @@ function Work() {
       </div>
       <div className="mx-auto mt-5 flex max-w-3xl items-center justify-between gap-3">
         <button className="circle-link shrink-0" onClick={() => move(-1)} aria-label="Previous project"><ArrowLeft strokeWidth={1.4}/></button>
-        <div className="min-w-0 text-center" aria-live="polite" aria-atomic="true"><div className="font-mono text-[10px] text-signal">{live.id} / {String(projects.length).padStart(2,'0')}</div><h3 className="mt-2 truncate text-xl font-extrabold tracking-[-.05em] sm:text-3xl">{live.title}</h3><p className="mt-2 max-w-md text-xs text-ink/70 sm:text-sm">{live.description}</p><button className="mt-3 inline-flex items-center gap-1 border-b border-ink font-mono text-[10px] hover:text-signal" onClick={() => setSelected(live)}>EXPLORE PROJECT <ArrowUpRight size={13}/></button></div>
+        <div className="min-w-0 text-center" aria-live="polite" aria-atomic="true"><div className="font-mono text-[10px] text-signal">{live.id} / {String(projects.length).padStart(2,'0')}</div><h3 className="mt-2 truncate text-xl font-extrabold tracking-[-.05em] sm:text-3xl">{live.title}</h3><p className="mt-2 max-w-md text-xs text-ink/70 sm:text-sm">{live.description}</p><button className="mt-3 inline-flex items-center gap-1 border-b border-ink font-mono text-[10px] hover:text-signal" onClick={() => openProject(live, document.querySelector('.project-card[aria-current="true"]'))}>EXPLORE PROJECT <ArrowUpRight size={13}/></button></div>
         <button className="circle-link shrink-0" onClick={() => move(1)} aria-label="Next project"><ArrowRight strokeWidth={1.4}/></button>
       </div>
       <div className="mt-12 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>← ARROWS / SWIPE TO ROTATE →</span><span className="text-right">PROJECT IMAGES: PLACEHOLDERS</span></div>
-      <ProjectModal project={selected} onClose={closeProject}/>
+      <ProjectModal selection={selected} onClose={closeProject}/>
     </section>
   )
 }
