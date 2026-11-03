@@ -63,14 +63,58 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .art-window { transition: transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .35s; }
 .art-orbit { transition: transform .5s cubic-bezier(.2,.8,.2,1); }
 .scroll-motion {
-  --reveal-y: 38px;
+  --reveal-y: 74px;
   opacity: 0;
   transform: translate3d(0, var(--reveal-y), 0);
-  transition: opacity .75s ease, transform .85s cubic-bezier(.2,.75,.2,1);
+  transition: opacity .9s ease, transform 1.05s cubic-bezier(.17,.72,.16,1);
 }
 .scroll-motion.is-visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
+}
+
+/* Flip the selected card to its reverse before expanding into the case study. */
+.project-overlay { animation: overlay-in .25s ease both; }
+.flip-stage { width: min(320px, 76vw); height: min(390px, 58vh); perspective: 1100px; }
+.flip-object {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: flip-to-back .72s cubic-bezier(.22,.72,.16,1) forwards;
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #191919;
+  padding: 25px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 25px 80px #0005;
+}
+.flip-front { background: #f3f1ea; }
+.flip-back { background: #f3f1ea; transform: rotateY(180deg); }
+.expanded-project {
+  transform-origin: center center;
+  animation: case-study-expand .65s cubic-bezier(.2,.8,.16,1) both;
+}
+.ui-preview { animation: preview-settle .7s .12s ease both; }
+@keyframes overlay-in { from { background-color: #0000; } to { background-color: #000b; } }
+@keyframes flip-to-back {
+  0% { transform: rotateY(0deg) scale(.84); }
+  48% { transform: rotateY(95deg) scale(1.04); }
+  100% { transform: rotateY(180deg) scale(1.12); }
+}
+@keyframes case-study-expand {
+  from { opacity: 0; transform: perspective(1000px) rotateY(-10deg) scale(.66) translateY(40px); }
+  to { opacity: 1; transform: perspective(1000px) rotateY(0deg) scale(1) translateY(0); }
+}
+@keyframes preview-settle {
+  from { opacity: .3; transform: translateY(20px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .error-code { font-size: clamp(150px, 25vw, 360px); }
 @keyframes rise-in { from { transform: translateY(44px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -83,5 +127,6 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .scroll-motion { opacity: 1 !important; transform: none !important; }
+  .flip-object, .expanded-project, .ui-preview { animation: none !important; transform: none !important; }
   .project-card:hover, .project-card:focus-visible { --hover-rise: 0px; --hover-tilt: 0deg; }
 }
