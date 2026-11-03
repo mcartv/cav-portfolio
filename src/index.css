@@ -74,7 +74,12 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 }
 
 /* Flip the selected card to its reverse before expanding into the case study. */
-.project-overlay { animation: overlay-in .25s ease both; }
+.project-overlay {
+  background-color: rgba(10, 10, 10, .78);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: overlay-in .48s cubic-bezier(.2,.7,.2,1) both;
+}
 .flip-stage { position: fixed; z-index: 2; perspective: 1100px; pointer-events: none; }
 .flip-object {
   position: relative;
@@ -103,7 +108,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
   animation: case-study-expand .65s cubic-bezier(.2,.8,.16,1) both;
 }
 .ui-preview { animation: preview-settle .7s .12s ease both; }
-@keyframes overlay-in { from { background-color: #0000; } to { background-color: #000b; } }
+@keyframes overlay-in { from { background-color: rgba(10,10,10,0); backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); } to { background-color: rgba(10,10,10,.78); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); } }
 @keyframes flip-to-back {
   0% { transform: rotateY(0deg) scale(1); }
   48% { transform: rotateY(95deg) scale(1.035); }
