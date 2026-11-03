@@ -171,5 +171,57 @@ export default function App() {
     window.addEventListener('resize',update)
     return () => {cancelAnimationFrame(raf);window.removeEventListener('scroll',update);window.removeEventListener('resize',update)}
   },[])
+
+  // Replay the section reveals in both directions. Each part moves upward when
+  // reached while scrolling down and downward when reached while scrolling up.
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (reducedMotion.matches || !('IntersectionObserver' in window)) return undefined
+
+    const selectors = [
+      '#about .section-label', '#about .grid',
+      '#work .section-label', '#work > .mt-10',
+      '#work .carousel-stage', '#work .controls',
+      '#tools .section-label', '#tools .grid',
+      '#film .section-label', '#film .film-label',
+      '#film .error-code', '#film h2', '#film .terminal',
+      '#contact .section-label', '#contact .editorial-heading',
+    ]
+    // Film's own markup uses a mono directory label rather than .film-label.
+    selectors.push('#film > p', '#contact > p')
+    const elements = [...document.querySelectorAll(selectors.join(','))]
+    let lastY = window.scrollY
+    let direction = 1
+    const onScroll = () => {
+      const nextY = window.scrollY
+      if (Math.abs(nextY - lastY) > 2) direction = nextY > lastY ? 1 : -1
+      lastY = nextY
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (isIntersecting) {
+          target.style.setProperty('--reveal-y', direction > 0 ? '38px' : '-38px')
+          target.classList.add('is-visible')
+        } else {
+          target.classList.remove('is-visible')
+        }
+      })
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 })
+
+    elements.forEach(el => {
+      el.classList.add('scroll-motion')
+      observer.observe(el)
+    })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      elements.forEach(el => {
+        el.classList.remove('scroll-motion', 'is-visible')
+        el.style.removeProperty('--reveal-y')
+      })
+    }
+  }, [])
+
   return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar/><main><Hero/><About/><Work/><Toolkit/><Film/></main><Contact/></>
 }
