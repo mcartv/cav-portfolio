@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Asterisk, Github, Menu, X } from 'lucide-react'
 import { projects } from './data/projects'
 
@@ -86,30 +86,101 @@ function ProjectArtwork({ project }) {
   )
 }
 
+// Stylized interface previews are original mockups, not screenshots of the real applications.
+function InterfacePreview({ project }) {
+  const isEducation = project.slug === 'ecolearn'
+  const isLeads = project.slug === 'weleads'
+  const isExperiment = project.slug === 'interface-lab'
+  const title = isEducation ? 'Learning overview' : isLeads ? 'Projects overview' : isExperiment ? 'Motion studies' : 'Scholar overview'
+  const tabs = isEducation ? ['COURSES', 'QUIZZES', 'PROGRESS'] : isLeads ? ['PROJECTS', 'CLIENTS', 'INQUIRIES'] : isExperiment ? ['STUDIES', 'COMPONENTS', 'MOTION'] : ['SCHOLARS', 'PAYOUTS', 'REPORTS']
+  const figures = isEducation ? ['08', '92%', '04'] : isLeads ? ['12', '05', '24'] : isExperiment ? ['06', '03', '09'] : ['128', '24', '16']
+  const labels = isEducation ? ['LESSONS', 'PROGRESS', 'MODULES'] : isLeads ? ['PROJECTS', 'ACTIVE', 'INQUIRIES'] : isExperiment ? ['COMPONENTS', 'MOTIONS', 'SKETCHES'] : ['SCHOLARS', 'REQUESTS', 'REPORTS']
+  return (
+    <div className="ui-preview overflow-hidden border border-ink/20 bg-[#f8f9f6] shadow-[0_24px_60px_#00000018]" aria-label={'Conceptual interface preview for ' + project.title}>
+      <div className="flex items-center justify-between border-b border-ink/15 bg-[#e9e9e3] px-3 py-2 sm:px-5">
+        <div className="flex gap-1.5"><i className="h-2 w-2 rounded-full bg-[#ef7868]"/><i className="h-2 w-2 rounded-full bg-[#e2bb63]"/><i className="h-2 w-2 rounded-full bg-[#81ad8c]"/></div>
+        <span className="font-mono text-[9px] tracking-wider">PREVIEW / {project.slug.toUpperCase()}</span>
+        <span className="text-[11px]">↗</span>
+      </div>
+      <div className="grid min-h-[240px] grid-cols-[60px_1fr] sm:min-h-[340px] sm:grid-cols-[138px_1fr]">
+        <aside className="border-r border-ink/10 p-2 sm:p-4" style={{backgroundColor:project.light}}>
+          <div className="text-lg font-black tracking-tighter sm:text-xl">{project.mark}<span className="text-signal">/</span></div>
+          <div className="mt-9 space-y-4">{tabs.map((tab,i) => <div key={tab} className={'flex items-center gap-2 font-mono text-[7px] sm:text-[10px] ' + (i===0?'font-bold':'opacity-50')}><span className="h-2 w-2 border border-ink/50"/><span className="hidden sm:block">{tab}</span></div>)}</div>
+        </aside>
+        <div className="min-w-0 p-3 sm:p-6">
+          <div className="flex items-center justify-between gap-3"><div><p className="font-mono text-[8px] tracking-wider text-ink/50">DASHBOARD / OVERVIEW</p><h4 className="mt-1 text-lg font-extrabold tracking-tight sm:text-3xl">{title}</h4></div><div className="hidden h-9 w-9 items-center justify-center rounded-full border border-ink/20 sm:flex">↗</div></div>
+          <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">{figures.map((value,i) => <div key={labels[i]} className="border border-ink/15 bg-white/80 p-2 sm:p-4"><p className="font-mono text-[7px] text-ink/60 sm:text-[9px]">{labels[i]}</p><strong className="mt-2 block text-xl tracking-tight sm:text-3xl">{value}</strong></div>)}</div>
+          <div className="mt-3 grid grid-cols-[1.4fr_1fr] gap-2 sm:mt-4 sm:gap-3"><div className="border border-ink/15 bg-white/80 p-3 sm:p-4"><p className="font-mono text-[8px]">ACTIVITY / OVERVIEW</p><div className="mt-5 flex h-20 items-end gap-[7%] sm:h-28">{[42,70,53,86,66,92,74].map((n,i) => <div key={i} className="flex-1" style={{height:n+'%',backgroundColor:i===5?'#f34d31':project.color}}/>)}</div></div><div className="border border-ink/15 bg-white/80 p-3 sm:p-4"><p className="font-mono text-[8px]">STATUS</p><div className="mx-auto mt-5 grid h-16 w-16 place-items-center rounded-full border-[7px] border-ink/15 border-t-signal text-xs font-extrabold sm:h-24 sm:w-24">78%</div></div></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ProjectModal({ project, onClose }) {
   const closeRef = useRef(null)
+  const [phase, setPhase] = useState('flip')
+  const reducedMotion = useRef(false)
+
   useEffect(() => {
     if (!project) return undefined
-    const previous = document.activeElement
     const oldOverflow = document.body.style.overflow
+    const previous = document.activeElement
+    reducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     document.body.style.overflow = 'hidden'
-    closeRef.current?.focus()
-    const onKey = e => { if (e.key === 'Escape') onClose(); if (e.key === 'Tab') { const nodes = [...document.querySelectorAll('[data-project-modal] a,[data-project-modal] button')]; const first = nodes[0]; const last = nodes[nodes.length - 1]; if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() } } }
+    setPhase(reducedMotion.current ? 'expanded' : 'flip')
+    const animation = reducedMotion.current ? 0 : 720
+    const timer = window.setTimeout(() => setPhase('expanded'), animation)
+    const focusTimer = window.setTimeout(() => closeRef.current?.focus(), animation + 35)
+    const onKey = e => {
+      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Tab') return
+      const root = document.querySelector('[data-project-modal]')
+      if (!root) { e.preventDefault(); return }
+      const nodes = [...root.querySelectorAll('a[href],button:not([disabled])')]
+      if (!nodes.length) { e.preventDefault(); return }
+      if (e.shiftKey && document.activeElement === nodes[0]) { e.preventDefault(); nodes[nodes.length-1].focus() }
+      else if (!e.shiftKey && document.activeElement === nodes[nodes.length-1]) { e.preventDefault(); nodes[0].focus() }
+    }
     window.addEventListener('keydown', onKey)
-    return () => { document.body.style.overflow = oldOverflow; window.removeEventListener('keydown', onKey); previous?.focus?.() }
+    return () => {
+      window.clearTimeout(timer)
+      window.clearTimeout(focusTimer)
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = oldOverflow
+      previous?.focus?.()
+    }
   }, [project, onClose])
+
   if (!project) return null
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 sm:p-8" onPointerDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" className="max-h-[92vh] w-full max-w-3xl overflow-y-auto bg-paper p-6 shadow-2xl sm:p-10">
-        <div className="flex items-center justify-between border-b border-ink pb-3 font-mono text-[11px]"><span>PROJECT FILE / {project.id}</span><button ref={closeRef} onClick={onClose} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
-        <div className="mt-7 font-mono text-[11px] text-signal">{project.type} — {project.year}</div>
-        <h2 id="project-modal-title" className="editorial-heading mt-3 text-[clamp(42px,8vw,92px)]">{project.title}</h2>
-        <div className="my-7 flex min-h-52 items-center justify-center border border-ink p-6" style={{background:project.color}}><span className="text-[clamp(100px,20vw,200px)] font-black leading-none tracking-[-.1em]">{project.mark}<span className="text-signal">.</span></span></div>
-        <p className="max-w-xl text-base leading-relaxed">{project.summary}</p>
-        <div className="mt-6 flex flex-wrap gap-2">{project.stack.map(t => <span className="border border-ink px-3 py-2 font-mono text-[10px]" key={t}>{t}</span>)}</div>
-        {project.link ? <a className="mt-8 inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer">VIEW REPOSITORY <ArrowUpRight size={15}/></a> : <p className="mt-7 font-mono text-xs text-ink/65">DETAILED CASE STUDY COMING SOON.</p>}
-      </section>
+    <div className={'project-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 sm:p-8 ' + (phase === 'expanded' ? 'overlay-expanded' : 'overlay-flip')} onPointerDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      {phase === 'flip' ? (
+        <div className="flip-stage" aria-hidden="true">
+          <div className="flip-object">
+            <div className="flip-face flip-front" style={{backgroundColor:project.color}}>
+              <div className="font-mono text-xs">{project.id} / {project.type}</div>
+              <div className="text-6xl font-black tracking-[-.1em]">{project.mark}<span className="text-signal">.</span></div>
+              <div className="text-2xl font-black tracking-tighter">{project.title}</div>
+            </div>
+            <div className="flip-face flip-back">
+              <div className="font-mono text-xs">PROJECT FILE / {project.id}</div>
+              <div className="text-4xl font-black tracking-tighter">BEHIND<br/>THE BUILD<span className="text-signal">.</span></div>
+              <div className="font-mono text-xs">OPENING CASE STUDY ↗</div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" className="expanded-project relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10">
+          <div className="flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={onClose} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
+          <h2 id="project-modal-title" className="editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
+          <InterfacePreview project={project}/>
+          <p className="mt-2 font-mono text-[9px] uppercase tracking-wide text-ink/60">Illustrative UI mockup — not an actual project screenshot</p>
+          <div className="mt-7 grid gap-6 md:grid-cols-[1.3fr_1fr]"><div><p className="font-mono text-[10px] text-signal">THE CONCEPT</p><p className="mt-2 max-w-xl text-sm leading-relaxed sm:text-base">{project.summary}</p></div><div><p className="font-mono text-[10px] text-signal">TECHNOLOGIES</p><div className="mt-3 flex flex-wrap gap-2">{project.stack.map(t => <span className="border border-ink px-3 py-2 font-mono text-[10px]" key={t}>{t}</span>)}</div></div></div>
+          {project.link ? <a className="mt-8 inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer">VIEW REPOSITORY <ArrowUpRight size={15}/></a> : <p className="mt-7 font-mono text-xs text-ink/65">FULL CASE STUDY COMING SOON.</p>}
+        </section>
+      )}
     </div>
   )
 }
@@ -118,6 +189,7 @@ function Work() {
   const [active, setActive] = useState(0)
   const [selected, setSelected] = useState(null)
   const touchStart = useRef(null)
+  const closeProject = useCallback(() => setSelected(null), [])
   const live = projects[active]
   const move = delta => setActive(current => (current + delta + projects.length) % projects.length)
   const onKey = e => { if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1) } if (e.key === 'ArrowRight') { e.preventDefault(); move(1) } }
@@ -144,7 +216,7 @@ function Work() {
         <button className="circle-link shrink-0" onClick={() => move(1)} aria-label="Next project"><ArrowRight strokeWidth={1.4}/></button>
       </div>
       <div className="mt-12 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>← ARROWS / SWIPE TO ROTATE →</span><span className="text-right">PROJECT IMAGES: PLACEHOLDERS</span></div>
-      <ProjectModal project={selected} onClose={() => setSelected(null)}/>
+      <ProjectModal project={selected} onClose={closeProject}/>
     </section>
   )
 }
@@ -183,7 +255,7 @@ export default function App() {
       '#work .section-label', '#work > .mt-10',
       '#work .carousel-stage', '#work .controls',
       '#tools .section-label', '#tools .grid',
-      '#film .section-label', '#film .film-label',
+      '#film .section-label',
       '#film .error-code', '#film h2', '#film .terminal',
       '#contact .section-label', '#contact .editorial-heading',
     ]
@@ -200,7 +272,7 @@ export default function App() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(({ target, isIntersecting }) => {
         if (isIntersecting) {
-          target.style.setProperty('--reveal-y', direction > 0 ? '38px' : '-38px')
+          target.style.setProperty('--reveal-y', direction > 0 ? '74px' : '-74px')
           target.classList.add('is-visible')
         } else {
           target.classList.remove('is-visible')
