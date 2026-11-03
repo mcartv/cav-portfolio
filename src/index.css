@@ -35,21 +35,53 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .carousel-stage { perspective: 1100px; perspective-origin: 50% 45%; }
 .project-card {
   transform-style: preserve-3d;
-  transform: translateX(calc(-50% + var(--offset) * min(32vw, 245px))) translateZ(calc(130px - var(--abs) * 240px)) rotateY(calc(var(--offset) * -19deg)) scale(calc(1 - var(--abs) * .16));
-  transition: transform .85s cubic-bezier(.2,.75,.16,1), opacity .65s, filter .65s;
+  transform: translateX(calc(-50% + var(--offset) * min(32vw, 245px))) translateZ(calc(130px - var(--abs) * 240px)) translateY(var(--hover-rise, 0px)) rotateZ(var(--hover-tilt, 0deg)) rotateY(calc(var(--offset) * -19deg)) scale(calc(1 - var(--abs) * .16));
+  transition: transform .85s cubic-bezier(.2,.75,.16,1), opacity .65s, filter .65s, box-shadow .35s;
   backface-visibility: hidden;
   will-change: transform;
+  box-shadow: 0 14px 28px #00000018;
 }
-.project-card:hover .art-window { box-shadow: 16px 17px 0 #00000022; }
-.art-window { transition: box-shadow .3s; }
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover {
+    --hover-rise: -19px;
+    --hover-tilt: -2deg;
+    box-shadow: 0 32px 60px #00000035;
+    filter: saturate(1.15) !important;
+  }
+  .project-card:hover .art-window {
+    transform: rotate(-3deg) scale(1.055);
+    box-shadow: 17px 19px 0 #00000026;
+  }
+  .project-card:hover .art-orbit {
+    transform: scale(1.09) rotate(9deg);
+  }
+}
+.project-card:focus-visible {
+  --hover-rise: -12px;
+  --hover-tilt: -1deg;
+}
+.art-window { transition: transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .35s; }
+.art-orbit { transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+.scroll-motion {
+  --reveal-y: 38px;
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y), 0);
+  transition: opacity .75s ease, transform .85s cubic-bezier(.2,.75,.2,1);
+}
+.scroll-motion.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
 .error-code { font-size: clamp(150px, 25vw, 360px); }
 @keyframes rise-in { from { transform: translateY(44px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 640px) {
   .hero-headline h1 { font-size: clamp(34px, 11.65vw, 70px); }
   .circle-link { width: 50px; height: 50px; }
-  .project-card { transform: translateX(calc(-50% + var(--offset) * min(37vw, 170px))) translateZ(calc(85px - var(--abs) * 175px)) rotateY(calc(var(--offset) * -18deg)) scale(calc(1 - var(--abs) * .17)); }
+  .project-card { transform: translateX(calc(-50% + var(--offset) * min(37vw, 170px))) translateZ(calc(85px - var(--abs) * 175px)) translateY(var(--hover-rise, 0px)) rotateZ(var(--hover-tilt, 0deg)) rotateY(calc(var(--offset) * -18deg)) scale(calc(1 - var(--abs) * .17)); }
   .error-code { font-size: clamp(140px, 29vw, 230px); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .scroll-motion { opacity: 1 !important; transform: none !important; }
+  .project-card:hover, .project-card:focus-visible { --hover-rise: 0px; --hover-tilt: 0deg; }
 }
