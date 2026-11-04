@@ -1,6 +1,6 @@
 {
   "displayName": "CARL ARTHUR V BUENAVIDEZ",
-  "headline": "4th Year BS Information Technology Student | Aspiring Software Engineer | Creative Coder",
+  "headline": "4th Year BS Information Technology Student",
   "location": "Philippines",
   "linkedinUrl": "",
   "photoUrl": "",
@@ -21,14 +21,7 @@
       "placeholder": false
     }
   ],
-  "experience": [
-    {
-      "label": "EXPERIENCE",
-      "title": "N/A",
-      "detail": "N/A",
-      "placeholder": false
-    }
-  ],
+  "experience": [],
   "learning": [
     {
       "label": "COURSE / CERTIFICATE",
