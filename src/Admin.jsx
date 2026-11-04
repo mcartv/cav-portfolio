@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { ArrowLeft, ArrowUpRight, Github, ImagePlus, Loader2, Plus, Save, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, ArrowUpRight, CheckCircle2, Github, ImagePlus, Loader2, Plus, Save, Trash2, X, AlertCircle } from 'lucide-react'
 
 const endpoint = action => '/api/admin?action=' + action
 async function request(action, options) {
@@ -8,7 +8,29 @@ async function request(action, options) {
   if (!res.ok) throw new Error(data.error || 'Request failed')
   return data
 }
-const blankCertificate = () => ({label:'COURSE / CERTIFICATE',title:'',issuer:'',date:'',image:'',url:'',placeholder:false})
+const blankCertificate = () => ({label:'COURSE',title:'',issuer:'',date:'',image:'',url:'',placeholder:false})
+const certificateCategories = ['COURSE','SEMINAR','CERTIFICATE']
+const projectCategories = ['FULL-STACK / MOBILE','FULL-STACK / WEB','FRONTEND / WEB','BACKEND / API','AUDIO / CREATIVE CODING','PERSONAL FINANCE / WEB','MOBILE APPLICATION','UI / UX DESIGN','AUTOMATION / TOOLS','DATA / ANALYTICS','GAME DEVELOPMENT','OTHER']
+const yearOptions = Array.from({length:16},(_,i)=>String(new Date().getFullYear()+1-i))
+const projectNumber = index => String(index + 1).padStart(2,'0')
+const newProject = () => ({id:'',slug:'new-project-'+Date.now().toString(36),title:'Untitled project',type:'FULL-STACK / WEB',year:String(new Date().getFullYear()),color:'#CAD8C4',light:'#EEF4EA',description:'',summary:'',stack:[],mark:'NP',link:'',live:''})
+const normalizeProjects = list => {
+  const real = list.filter(p=>!p.placeholder && p.slug !== 'coming-soon')
+  const placeholder = list.find(p=>p.placeholder || p.slug === 'coming-soon')
+  return [...real.map((p,i)=>({...p,id:projectNumber(i),placeholder:false})),{...placeholder,id:projectNumber(real.length),slug:'coming-soon',placeholder:true}]
+}
+const normalizeLegacyCategory = value => value === 'COURSE / CERTIFICATE' ? 'COURSE' : value === 'CERTIFICATION' ? 'CERTIFICATE' : value
+function SelectField({label,value,options,onChange}) {
+  return <label className="block min-w-0"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">{label}</span><select className={inputClass} value={value||''} onChange={e=>onChange(e.target.value)}>{!options.includes(value)&&value&&<option value={value}>{value}</option>}{options.map(o=><option value={o} key={o}>{o}</option>)}</select></label>
+}
+function DateField({label,value,onChange}) {
+  const valid = /^\\d{4}-\\d{2}-\\d{2}$/.test(value||'')
+  return <label className="block min-w-0"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">{label}</span><input type="date" className={inputClass} value={valid?value:''} onChange={e=>onChange(e.target.value)}/>{value&&!valid&&<span className="mt-1 block text-[10px] text-[#9b533d]">Previous date: {value}. Select a date to replace it.</span>}</label>
+}
+function ColorField({label,value,onChange}) {
+  const valid = /^#[0-9a-fA-F]{6}$/.test(value||'')
+  return <label className="block min-w-0"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">{label}</span><div className="flex gap-2"><input type="color" aria-label={label+' color picker'} className="h-[43px] w-14 shrink-0 cursor-pointer border border-[#b7b3a8] bg-[#fbfaf6] p-1" value={valid?value:'#CAD8C4'} onChange={e=>onChange(e.target.value.toUpperCase())}/><input aria-label={label+' hex code'} className={inputClass+' font-mono'} value={value||''} maxLength={7} placeholder="#CAD8C4" onChange={e=>onChange(e.target.value.toUpperCase())}/></div>{!valid&&<span className="mt-1 block text-[10px] text-[#a33b2c]">Use a six-digit hex code (for example #CAD8C4).</span>}</label>
+}
 const inputClass = 'w-full min-w-0 border border-[#b7b3a8] bg-[#fbfaf6] px-3 py-2.5 text-sm text-[#191919] outline-offset-2 focus:outline-[#e95436]'
 function Field({label,value,onChange,multiline=false,placeholder=''}) {
   return <label className="block min-w-0"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">{label}</span>
@@ -22,6 +44,10 @@ export default function Admin() {
   const [busy,setBusy] = useState('')
   const [message,setMessage] = useState('')
   const [error,setError] = useState('')
+  const [toast,setToast] = useState(null)
+  const toastTimeout = useRef(null)
+  const notify = (type,text) => {setToast({type,text});window.clearTimeout(toastTimeout.current);toastTimeout.current=window.setTimeout(()=>setToast(null),4500)}
+  useEffect(()=>()=>window.clearTimeout(toastTimeout.current),[])
   async function load() {
     setBusy('loading')
     setError('')
@@ -61,15 +87,17 @@ export default function Admin() {
     setBusy('saving');setMessage('');setError('')
     try {
       const current=documents[name]
-      const result=await request('save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,sha:current.sha,data:current.data})})
-      setDocuments(old=>({...old,[name]:{...old[name],sha:result.sha}}))
-      setMessage('Saved to GitHub. Vercel will rebuild if automatic deployment is enabled.')
-    } catch(err){setError(err.message)}
+      const data=name==='projects'?normalizeProjects(current.data):current.data
+      if(name==='projects'&&data.some(p=>!/^#[0-9a-fA-F]{6}$/.test(p.color)||!/^#[0-9a-fA-F]{6}$/.test(p.light))) throw new Error('Enter valid six-digit hex colors before saving.')
+      const result=await request('save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,sha:current.sha,data})})
+      setDocuments(old=>({...old,[name]:{...old[name],data,sha:result.sha}}))
+      notify('success','Saved to GitHub! Your portfolio will update after Vercel redeploys.')
+    } catch(err){setError(err.message);notify('error',err.message)}
     finally{setBusy('')}
   }
   async function upload(index,file) {
     if (!file) return
-    if (file.size > 1900000){setError('Please compress the image below 1.9 MB.');return}
+    if (file.size > 1900000){setError('Please compress the image below 1.9 MB.');notify('error','Please compress the image below 1.9 MB.');return}
     setBusy('upload');setError('');setMessage('')
     try {
       const base64=await new Promise((resolve,reject)=>{
@@ -81,8 +109,8 @@ export default function Admin() {
       const result=await request('upload',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name:file.name,content:base64})})
       update('profile',data=>({...data,learning:data.learning.map((item,i)=>i===index?{...item,image:result.url,url:item.url||result.url,placeholder:false}:item)}))
-      setMessage('Image uploaded to GitHub. Save Certificates below to publish the new image reference.')
-    } catch(err){setError(err.message)}
+      notify('success','Image uploaded. Remember to save Certificates to publish it.')
+    } catch(err){setError(err.message);notify('error',err.message)}
     finally{setBusy('')}
   }
   async function logout(){
@@ -124,7 +152,7 @@ export default function Admin() {
           <p className="text-sm text-[#77766c]">Upload a JPG/PNG/WebP under 1.9MB. Uploading creates an image commit; save this list afterward to display it publicly.</p>
           {profile.learning.map((item,i)=><article key={i} className="border border-[#aaa596] bg-[#f8f6f0] p-5 sm:p-7">
             <div className="mb-5 flex items-center justify-between gap-3"><span className="font-mono text-xs">ENTRY {String(i+1).padStart(2,'0')}</span><button onClick={()=>patchProfile('learning',profile.learning.filter((_,j)=>j!==i))} className="flex items-center gap-1 font-mono text-[10px] text-[#9c3d30]"><Trash2 size={14}/> REMOVE</button></div>
-            <div className="grid gap-4 sm:grid-cols-2"><Field label="CATEGORY" value={item.label} onChange={v=>patchList('learning',i,'label',v)}/><Field label="DATE" value={item.date} onChange={v=>patchList('learning',i,'date',v)}/><Field label="CERTIFICATE TITLE" value={item.title} onChange={v=>patchList('learning',i,'title',v)}/><Field label="ISSUER" value={item.issuer} onChange={v=>patchList('learning',i,'issuer',v)}/><Field label="IMAGE URL/PATH" value={item.image} onChange={v=>patchList('learning',i,'image',v)}/><Field label="DOCUMENT LINK" value={item.url} onChange={v=>patchList('learning',i,'url',v)}/></div>
+            <div className="grid gap-4 sm:grid-cols-2"><SelectField label="CATEGORY" value={normalizeLegacyCategory(item.label)} options={certificateCategories} onChange={v=>patchList('learning',i,'label',v)}/><DateField label="DATE (MONTH / DAY / YEAR)" value={item.date} onChange={v=>patchList('learning',i,'date',v)}/><Field label="CERTIFICATE TITLE" value={item.title} onChange={v=>patchList('learning',i,'title',v)}/><Field label="ISSUER" value={item.issuer} onChange={v=>patchList('learning',i,'issuer',v)}/><Field label="IMAGE URL/PATH" value={item.image} onChange={v=>patchList('learning',i,'image',v)}/><Field label="DOCUMENT LINK" value={item.url} onChange={v=>patchList('learning',i,'url',v)}/></div>
             {item.image&&<img className="mt-5 max-h-72 w-full border border-[#c5c0b5] bg-white object-contain" src={item.image} alt={item.title||'Certificate preview'}/>}
             <label className="mt-5 inline-flex cursor-pointer items-center gap-2 border border-[#191919] px-4 py-3 font-mono text-[11px]"><ImagePlus size={16}/> {busy==='upload'?'UPLOADING…':'UPLOAD IMAGE'}<input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={!!busy} onChange={e=>{upload(i,e.target.files?.[0]);e.target.value=''}}/></label>
           </article>)}
@@ -132,12 +160,25 @@ export default function Admin() {
         </>}
         {active==='projects'&&<>
           <h2 className="text-2xl font-black tracking-tight">SELECTED PROJECTS</h2>
-          {projects.map((project,i)=><article key={i} className="border border-[#aaa596] bg-[#f8f6f0] p-5 sm:p-7">
-            <p className="mb-5 font-mono text-[10px]">PROJECT {project.id} / {project.slug}</p>
-            <div className="grid gap-4 sm:grid-cols-2">{[['id','CARD NUMBER'],['slug','SLUG'],['title','TITLE'],['type','CATEGORY'],['year','YEAR'],['mark','MARK'],['description','SHORT DESCRIPTION'],['link','GITHUB URL'],['live','LIVE URL'],['color','CARD COLOR'],['light','LIGHT COLOR']].map(([field,label])=><Field key={field} label={label} value={project[field]} onChange={v=>patchProject(i,field,v)}/>)}</div>
+          {projects.filter(p=>!p.placeholder && p.slug!=='coming-soon').map((project,i)=><article key={project.slug+'-'+i} className="border border-[#aaa596] bg-[#f8f6f0] p-5 sm:p-7">
+            <div className="mb-5 flex items-center justify-between gap-3"><p className="font-mono text-[10px]">PROJECT {projectNumber(i)} / {project.slug}</p><button className="flex items-center gap-1 font-mono text-[10px] text-[#9c3d30]" onClick={()=>update('projects',list=>normalizeProjects(list.filter((p,j)=>j!==i)))}><Trash2 size={14}/> REMOVE</button></div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="block"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">CARD NUMBER · AUTO</span><div className={inputClass+' bg-[#e5e3da] font-mono text-[#65645a]'}>{projectNumber(i)}</div></div>
+              <Field label="SLUG" value={project.slug} onChange={v=>patchProject(i,'slug',v)}/>
+              <Field label="TITLE" value={project.title} onChange={v=>patchProject(i,'title',v)}/>
+              <SelectField label="CATEGORY" value={project.type} options={projectCategories} onChange={v=>patchProject(i,'type',v)}/>
+              <SelectField label="YEAR" value={project.year} options={yearOptions} onChange={v=>patchProject(i,'year',v)}/>
+              <Field label="MARK" value={project.mark} onChange={v=>patchProject(i,'mark',v)}/>
+              <Field label="SHORT DESCRIPTION" value={project.description} onChange={v=>patchProject(i,'description',v)}/>
+              <Field label="GITHUB URL" value={project.link} onChange={v=>patchProject(i,'link',v)}/>
+              <Field label="LIVE URL" value={project.live} onChange={v=>patchProject(i,'live',v)}/>
+              <ColorField label="CARD COLOR" value={project.color} onChange={v=>patchProject(i,'color',v)}/>
+              <ColorField label="LIGHT COLOR" value={project.light} onChange={v=>patchProject(i,'light',v)}/>
+            </div>
             <div className="mt-4 space-y-4"><Field label="CASE STUDY SUMMARY" multiline value={project.summary} onChange={v=>patchProject(i,'summary',v)}/><Field label="TECH STACK (COMMA SEPARATED)" value={project.stack.join(', ')} onChange={v=>patchProject(i,'stack',v.split(',').map(x=>x.trim()).filter(Boolean))}/></div>
           </article>)}
-          <p className="font-mono text-xs text-[#77766c]">Project ordering and the coming-soon card are maintained here. Add/remove cards manually in projects.json for now.</p>
+          <button className={button} onClick={()=>update('projects',list=>normalizeProjects([...list.filter(p=>!p.placeholder && p.slug!=='coming-soon'),newProject(),...list.filter(p=>p.placeholder || p.slug==='coming-soon')]))}><Plus size={16}/> ADD PROJECT</button>
+          <div className="border border-dashed border-[#a8a698] bg-[#e8e5dc] p-5 sm:p-7"><div className="flex items-center justify-between gap-3"><span className="font-mono text-[10px]">CARD {projectNumber(projects.length-1)} / FIXED PLACEHOLDER</span><span className="font-mono text-[10px] text-[#626557]">LOCKED</span></div><h3 className="mt-4 text-xl font-bold">More projects to come</h3><p className="mt-2 text-sm text-[#66665e]">This is a permanent closing card that signals new projects are in progress. It stays last, is not editable, and is automatically renumbered as your portfolio grows.</p></div>
         </>}
         <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-[#191919] bg-[#f3f1ea]/95 py-5 backdrop-blur-sm">
           <p className="font-mono text-[10px] text-[#77766c]">SAVING COMMITS TO MAIN BRANCH</p>
@@ -147,6 +188,11 @@ export default function Admin() {
         </div>
       </section>}
       <a href="/" className="my-10 inline-flex items-center gap-2 font-mono text-[11px]"><ArrowLeft size={14}/> BACK TO WEBSITE <ArrowUpRight size={14}/></a>
+      {toast && <div role={toast.type==='error'?'alert':'status'} aria-live={toast.type==='error'?'assertive':'polite'} className="fixed bottom-5 right-4 z-[300] flex w-[min(390px,calc(100vw-32px))] items-start gap-3 border border-[#191919] bg-[#f8f6f0] p-4 shadow-[7px_7px_0_#19191930] sm:bottom-7 sm:right-7 sm:p-5">
+        {toast.type==='error'?<AlertCircle size={22} className="shrink-0 text-[#bb4732]"/>:<CheckCircle2 size={22} className="shrink-0 text-[#687e5b]"/>}
+        <div className="min-w-0 flex-1"><div className="font-mono text-[10px] tracking-wider text-[#72716a]">{toast.type==='error'?'SAVE FAILED':'CONTENT STUDIO / SAVED'}</div><p className="mt-1 text-sm leading-relaxed">{toast.text}</p></div>
+        <button aria-label="Dismiss notification" onClick={()=>{window.clearTimeout(toastTimeout.current);setToast(null)}} className="shrink-0 p-1 hover:bg-[#e8e5dc]"><X size={17}/></button>
+      </div>}
     </div>
   </main>
 }
