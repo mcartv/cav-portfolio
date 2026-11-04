@@ -324,6 +324,7 @@ export default function App() {
   const [certificatesOpen,setCertificatesOpen] = useState(false)
   const [arcadePhase,setArcadePhase] = useState('idle')
   const [planeCount,setPlaneCount] = useState(0)
+  const planeClicks = useRef(0)
   const easterTimer = useRef(null)
   const openFilm = useCallback(() => setFilmOpen(true), [])
   const closeFilm = useCallback(() => setFilmOpen(false), [])
@@ -332,17 +333,23 @@ export default function App() {
   const onPlaneClick = useCallback(() => {
     if(arcadePhase!=='idle')return
     window.clearTimeout(easterTimer.current)
-    setPlaneCount(n=>{
-      if(n>=4){
-        window.setTimeout(()=>setArcadePhase('ejecting'),0)
-        return 0
-      }
-      return n+1
-    })
-    easterTimer.current=window.setTimeout(()=>setPlaneCount(0),6000)
+    planeClicks.current += 1
+    if(planeClicks.current>=5){
+      planeClicks.current=0
+      setPlaneCount(0)
+      setArcadePhase('ejecting')
+      return
+    }
+    setPlaneCount(planeClicks.current)
+    easterTimer.current=window.setTimeout(()=>{planeClicks.current=0;setPlaneCount(0)},6000)
   },[arcadePhase])
-  const exitArcade=useCallback(()=>setArcadePhase('idle'),[])
+  const exitArcade=useCallback(()=>setArcadePhase('returning'),[])
   useEffect(()=>()=>window.clearTimeout(easterTimer.current),[])
+  useEffect(()=>{
+    if(arcadePhase!=='returning')return undefined
+    const timer=window.setTimeout(()=>setArcadePhase('idle'),780)
+    return ()=>window.clearTimeout(timer)
+  },[arcadePhase])
   useEffect(()=>{
     if(arcadePhase!=='ejecting')return undefined
     const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -413,7 +420,7 @@ export default function App() {
   }, [])
 
   return <>
-    <div className={'portfolio-world '+(arcadePhase==='ejecting'||arcadePhase==='playing'?'is-ejecting':'')}>
+    <div className={'portfolio-world '+(arcadePhase==='ejecting'||arcadePhase==='playing'?'is-ejecting':arcadePhase==='returning'?'is-returning':'')}>
       <div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/>
       <Navbar onFilmOpen={openFilm}/>
       <main><Hero onPlaneClick={onPlaneClick} planeCount={planeCount}/><About onCertificatesOpen={openCertificates}/><Work/><Toolkit/></main>
