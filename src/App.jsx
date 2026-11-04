@@ -3,7 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Asterisk, Github, Menu,
 import { projects } from './data/projects'
 import { profile } from './data/profile'
 import { DragHandle, FilmWindow, CertificatesWindow } from './components/ArchiveWindows'
-import SpaceInvaders from './components/SpaceInvaders'
+import ArcadeHub from './components/ArcadeHub'
 
 const skills = [
   { number: '01', category: 'FRONTEND', items: 'React, JavaScript, HTML, CSS' },
@@ -428,6 +428,6 @@ export default function App() {
     </div>
     <FilmWindow open={filmOpen} onClose={closeFilm}/>
     <CertificatesWindow open={certificatesOpen} onClose={closeCertificates}/>
-    {arcadePhase==='playing'&&<SpaceInvaders onExit={exitArcade}/>}
+    {arcadePhase==='playing'&&<ArcadeHub onExit={exitArcade}/>}
   </>
 }
