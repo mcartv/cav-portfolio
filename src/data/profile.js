@@ -4,6 +4,7 @@ export const profile = {
   headline: 'IT Developer / Creative Technologist',
   location: 'Philippines',
   linkedinUrl: '', // Paste your complete LinkedIn profile URL
+  photoUrl: '', // Put your square portrait in public/profile.jpg, then set this to '/profile.jpg'
   githubUrl: 'https://github.com/mcartv',
   resumeUrl: '', // Optional: link to a public resume PDF
   introduction: 'I enjoy creating digital experiences that balance thoughtful design and functional engineering. My work spans full-stack applications, creative coding, and problem-solving through technology.',
