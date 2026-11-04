@@ -17,7 +17,8 @@
     ],
     "mark": "SP",
     "link": "https://github.com/mcartv/SMaRT-PDM",
-    "live": "https://smart-pdm.vercel.app/landing"
+    "live": "https://smart-pdm.vercel.app/landing",
+    "placeholder": false
   },
   {
     "id": "02",
@@ -36,7 +37,8 @@
       "Canvas"
     ],
     "mark": "♪",
-    "link": "https://github.com/mcartv/song-painter"
+    "link": "https://github.com/mcartv/song-painter",
+    "placeholder": false
   },
   {
     "id": "03",
@@ -55,10 +57,10 @@
       "Vite"
     ],
     "mark": "₱",
-    "link": "https://github.com/mcartv/budget-tracker"
+    "link": "https://github.com/mcartv/budget-tracker",
+    "placeholder": false
   },
   {
-    "id": "04",
     "slug": "coming-soon",
     "title": "More projects to come",
     "type": "THE NEXT CHAPTER",
@@ -70,6 +72,7 @@
     "stack": [],
     "mark": "…",
     "link": null,
-    "placeholder": true
+    "placeholder": true,
+    "id": "04"
   }
 ]
