@@ -114,7 +114,7 @@ export default function EndlessShooter({onExit}) {
       g.last=now
       if(g.phase==='playing'){
         g.elapsed+=dt
-        const difficulty=Math.min(6,1+g.elapsed/35)
+        const difficulty=1+Math.sqrt(g.elapsed/18)
         g.level=1+Math.floor(g.elapsed/25)
         g.invuln=Math.max(0,g.invuln-dt)
         g.shipX=clamp(g.shipX+(Number(keys.current.right)-Number(keys.current.left))*310*dt,23,W-23)
@@ -145,7 +145,7 @@ export default function EndlessShooter({onExit}) {
           g.enemyShots.push({x:e.x,y:e.y+14,vy:170+difficulty*24})
         }
         for(const e of g.enemies)if(e.alive){
-          const slow=e.slowUntil>g.elapsed?.35:1
+          const slow=e.slowUntil>g.elapsed?0.35:1
           e.y+=e.vy*slow*dt
           e.x=clamp(e.x+e.vx*dt,18,W-18)
           if(e.y>H+30)e.alive=false
