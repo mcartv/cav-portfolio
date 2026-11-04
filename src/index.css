@@ -161,7 +161,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
   will-change: transform;
 }
 .drawer-layer.is-open .drawer-surface { transform: translate3d(0, 0, 0); }
-.drawer-handle { touch-action: pan-y; user-select: none; }
+.drawer-handle { touch-action: pan-y; user-select: none; transform: translateX(var(--drag-pull, 0px)); transition: background-color .25s, color .25s, transform .18s ease-out; }
 .drawer-handle:active { cursor: grabbing; }
 .drawer-panel-header { touch-action: pan-y; user-select: none; }
 .film-window { overscroll-behavior: contain; }
