@@ -15,9 +15,25 @@ export const profile = {
   experience: [
     { label: 'EXPERIENCE', title: 'N/A', detail: 'N/A', placeholder: false },
   ],
+
   learning: [
-    { label: 'COURSE / CERTIFICATE', title: 'Add your first certificate', issuer: 'Course provider', date: 'Date earned', url: '', placeholder: true },
-    { label: 'SEMINAR', title: 'Add a seminar or workshop', issuer: 'Event organizer', date: 'Date attended', url: '', placeholder: true },
-    { label: 'CERTIFICATION', title: 'More credentials will appear here', issuer: 'Additional professional learning', date: '—', url: '', placeholder: true },
+    {
+      label: 'COURSE / CERTIFICATE',
+      title: 'Certificate Title Here',
+      issuer: 'Issuing Organization',
+      date: 'October 2026',
+      image: '/certificates/certificate-01.webp',
+      url: '/certificates/certificate-01.webp',
+      placeholder: false,
+    },
+    {
+      label: 'SEMINAR',
+      title: 'Seminar Title Here',
+      issuer: 'Seminar Organizer',
+      date: 'September 2026',
+      image: '/certificates/certificate-02.webp',
+      url: '/certificates/certificate-02.webp',
+      placeholder: false,
+    },
   ],
 }
