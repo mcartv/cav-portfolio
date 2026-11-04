@@ -131,6 +131,56 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .coming-soon-art { background-image: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 55%); }
 .archive-toast { animation: toast-arrive .45s cubic-bezier(.17,.8,.2,1) both; }
 @keyframes toast-arrive { from { opacity: 0; transform: translate(-50%, 22px); } to { opacity: 1; transform: translate(-50%, 0); } }
+/* The filmmaking archive is now a separate sliding window rather than a page section. */
+.drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear .82s;
+}
+.drawer-layer.is-open {
+  pointer-events: auto;
+  visibility: visible;
+  transition: visibility 0s;
+}
+.drawer-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 15, 15, .38);
+  opacity: 0;
+  transition: opacity .75s ease;
+}
+.drawer-layer.is-open .drawer-scrim { opacity: 1; }
+.drawer-surface {
+  position: relative;
+  z-index: 1;
+  transform: translate3d(100%, 0, 0);
+  transition: transform .82s cubic-bezier(.19,.76,.14,1);
+  will-change: transform;
+}
+.drawer-layer.is-open .drawer-surface { transform: translate3d(0, 0, 0); }
+.drawer-handle { touch-action: pan-y; user-select: none; }
+.drawer-handle:active { cursor: grabbing; }
+.drawer-panel-header { touch-action: pan-y; user-select: none; }
+.film-window { overscroll-behavior: contain; }
+.film-window-content { isolation: isolate; }
+.film-glitch { font-size: clamp(65px, 11vw, 185px); }
+.film-grid {
+  background-image: linear-gradient(rgba(237, 56, 48, .12) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(237, 56, 48, .12) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 35%, #000 80%, transparent 100%);
+}
+.certificate-scroll { overscroll-behavior: contain; scrollbar-color: #93958b transparent; }
+.certificate-entry { transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; }
+@media (hover:hover) and (pointer:fine) {
+  .certificate-entry:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 8px 0 rgba(107, 114, 93, .14);
+  }
+}
 .error-code { font-size: clamp(150px, 25vw, 360px); }
 @keyframes rise-in { from { transform: translateY(44px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 640px) {
@@ -145,5 +195,6 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
   .scroll-motion { opacity: 1 !important; transform: none !important; }
   .flip-object, .expanded-project, .ui-preview { animation: none !important; transform: none !important; }
   .archive-toast { animation: none !important; transform: translateX(-50%) !important; }
+  .drawer-surface, .drawer-scrim { transition-duration: .01ms !important; }
   .project-card:hover, .project-card:focus-visible { --hover-rise: 0px; --hover-tilt: 0deg; }
 }
