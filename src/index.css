@@ -163,6 +163,16 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .drawer-layer.is-open .drawer-surface { transform: translate3d(0, 0, 0); }
 .drawer-handle { touch-action: pan-y; user-select: none; transform: translateX(var(--drag-pull, 0px)); transition: background-color .25s, color .25s, transform .18s ease-out; }
 .drawer-handle:active { cursor: grabbing; }
+.film-secret-tab {
+  box-shadow: inset 0 0 0 1px #ffffff40;
+  border-radius: 2px;
+  touch-action: none;
+}
+.film-secret-tab:hover { background-color: #deddd3; box-shadow: 2px 2px 0 #19191918; }
+.secret-tab-lines { display: flex; flex-direction: column; gap: 3px; }
+.secret-tab-lines i { display: block; width: 12px; height: 1px; background: currentColor; opacity: .63; }
+.secret-tab-lines i:nth-child(2) { width: 9px; }
+.secret-tab-lines i:nth-child(3) { width: 6px; }
 .drawer-panel-header { touch-action: pan-y; user-select: none; }
 .film-window { overscroll-behavior: contain; }
 .film-window-content { isolation: isolate; }
