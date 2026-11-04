@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Asterisk, Github, Menu, X } from 'lucide-react'
 import { projects } from './data/projects'
+import { profile } from './data/profile'
+import { DragHandle, FilmWindow, CertificatesWindow } from './components/ArchiveWindows'
 
 const skills = [
   { number: '01', category: 'FRONTEND', items: 'React, JavaScript, HTML, CSS' },
@@ -18,9 +20,9 @@ function SectionLabel({ index, title, aside, dark = false }) {
   )
 }
 
-function Navbar() {
+function Navbar({ onFilmOpen }) {
   const [open, setOpen] = useState(false)
-  const links = [['ABOUT', '#about'], ['WORK', '#work'], ['FILM', '#film'], ['CONTACT', '#contact']]
+  const links = [['ABOUT', '#about'], ['WORK', '#work'], ['CONTACT', '#contact']]
   return (
     <header className="site-header relative z-50 flex items-center justify-between gap-4 border-b border-ink px-[5%] py-4 sm:py-5">
       <a href="#home" aria-label="INDEX portfolio home" className="font-black text-3xl tracking-[-.11em]">INDEX<span className="text-signal">/</span></a>
@@ -28,8 +30,9 @@ function Navbar() {
       <button className="md:hidden p-2" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)}>
         {open ? <X size={23} /> : <Menu size={23} />}
       </button>
-      <nav aria-label="Main navigation" className={`${open ? 'flex' : 'hidden'} absolute top-full left-0 right-0 flex-col gap-5 border-b border-ink bg-paper px-[5%] py-7 font-mono text-xs md:static md:flex md:flex-row md:gap-7 md:border-0 md:bg-transparent md:p-0`}>
+      <nav aria-label="Main navigation" className={`${open ? 'flex' : 'hidden'} absolute top-full left-0 right-0 flex-col gap-5 border-b border-ink bg-paper px-[5%] py-7 font-mono text-xs md:static md:flex md:flex-row md:items-center md:gap-5 md:border-0 md:bg-transparent md:p-0`}>
         {links.map(([name, href]) => <a key={name} href={href} className="transition-colors hover:text-signal focus-visible:text-signal" onClick={() => setOpen(false)}>{name}</a>)}
+        <DragHandle kind="film" onOpen={() => { setOpen(false); onFilmOpen() }} className="self-start md:ml-2"/>
       </nav>
     </header>
   )
@@ -55,16 +58,32 @@ function Hero() {
   )
 }
 
-function About() {
+function About({ onCertificatesOpen }) {
   return (
     <section id="about" className="page-gutter bg-stonewash py-10 md:py-20">
-      <SectionLabel index="01" title="THE PERSON BEHIND THE SCREEN" aside="ABOUT ME ↘"/>
-      <div className="grid gap-10 pt-16 md:grid-cols-[1fr_2.1fr]">
-        <Asterisk size={95} strokeWidth={1.2} className="text-signal"/>
+      <SectionLabel index="01" title="THE PERSON BEHIND THE SCREEN" aside="ABOUT / CURRICULUM VITAE"/>
+      <div className="mt-10 flex items-center justify-between gap-4 border-b border-ink/25 pb-5">
+        <span className="font-mono text-[10px] tracking-widest text-ink/60">THE HUMAN BEHIND THE CODE</span>
+        <DragHandle kind="certificates" onOpen={onCertificatesOpen}/>
+      </div>
+      <div className="grid gap-8 pt-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-14">
         <div>
-          <h2 className="editorial-heading text-[clamp(38px,6.6vw,93px)]">TECHNICAL<br/>BY TRAINING.<br/><span className="text-signal">CREATIVE<br className="hidden md:block"/> BY NATURE.</span></h2>
-          <p className="mt-8 max-w-xl text-base leading-[1.8]">I work at the intersection of functional technology and thoughtful visual design. I enjoy building practical software, exploring unfamiliar interfaces, and finding ways to tell meaningful stories.</p>
-          <div className="mt-8 flex flex-wrap gap-2">{['FRONTEND', 'BACKEND', 'DATABASES', 'VISUAL STORYTELLING'].map(item => <span key={item} className="border border-ink px-3 py-2 font-mono text-[10px]">{item}</span>)}</div>
+          <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[#999c8c] bg-[#dedfd4] text-[#62705c]"><Asterisk size={54} strokeWidth={1.1}/></div>
+          <span className="font-mono text-[11px] text-ink/60">INTRODUCING / {profile.location.toUpperCase()}</span>
+          <h2 className="editorial-heading mt-4 text-[clamp(45px,6vw,88px)]">MORE THAN<br/>JUST <span className="font-serif font-normal italic text-signal">code.</span></h2>
+          <p className="mt-6 max-w-sm text-base leading-[1.8]">{profile.introduction}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal" href={profile.githubUrl} target="_blank" rel="noopener noreferrer"><Github size={16}/> GITHUB <ArrowUpRight size={13}/></a>
+            {profile.linkedinUrl ? <a className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal" href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">LINKEDIN <ArrowUpRight size={13}/></a> : <span className="border-b border-dashed border-ink/40 pb-2 font-mono text-[11px] text-ink/50" title="Set linkedinUrl in src/data/profile.js">LINKEDIN — ADD PROFILE URL</span>}
+            {profile.resumeUrl && <a className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal" href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">RESUME PDF <ArrowUpRight size={13}/></a>}
+          </div>
+        </div>
+        <div className="space-y-8">
+          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">00 / PROFILE</span><h3 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">{profile.displayName}</h3><p className="mt-1 text-sm">{profile.headline}</p></div>
+          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">01 / WHAT I DO</span><div className="mt-5 grid gap-3 sm:grid-cols-2">{profile.focus.map((focus,i) => <div className="flex gap-3 border-b border-ink/20 pb-3 text-sm" key={focus}><span className="font-mono text-[10px] text-ink/50">0{i+1}</span><span>{focus}</span></div>)}</div></div>
+          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">02 / EDUCATION</span>{profile.education.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
+          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">03 / EXPERIENCE</span>{profile.experience.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
+          <button onClick={onCertificatesOpen} className="group flex w-full items-center justify-between border border-ink px-5 py-4 text-left font-mono text-[11px] transition-colors hover:bg-ink hover:text-paper"><span>VIEW COURSES & CERTIFICATES</span><ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1"/></button>
         </div>
       </div>
     </section>
@@ -255,16 +274,14 @@ function Toolkit() {
   return <section id="tools" className="page-gutter bg-stonewash py-12 md:py-20"><SectionLabel index="03" title="SKILLS AND WORKFLOW" aside="THE TOOLKIT"/><div className="japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div><div className="mt-14 grid gap-10 md:grid-cols-2"><h2 className="editorial-heading text-[clamp(48px,7vw,110px)]">TOOLS OF<br/><span className="text-signal">THE TRADE.</span></h2><div>{skills.map(skill => <div key={skill.number} className="grid grid-cols-[95px_1fr_20px] items-center gap-2 border-b border-ink py-5 first:border-t sm:grid-cols-[145px_1fr_20px]"><span className="font-mono text-[10px]">{skill.number} / {skill.category}</span><strong className="text-sm sm:text-base">{skill.items}</strong><ArrowUpRight size={16}/></div>)}</div></div></section>
 }
 
-function Film() {
-  return <section id="film" className="page-gutter bg-[#171717] py-12 text-paper md:py-20"><SectionLabel index="04" title="THE OTHER SIDE" aside="● ARCHIVE OFFLINE" dark/><p className="mt-14 font-mono text-[11px] text-paper/60">DIRECTORY: /CREATIVE/FILM/</p><div className="error-code mt-4 font-black leading-none tracking-[-.13em]">404<span className="text-signal">_</span></div><h2 className="editorial-heading text-[clamp(55px,9vw,130px)]">NO FRAMES<br/>TO SHOW. <span className="text-signal">YET.</span></h2><p className="mt-8 text-sm leading-relaxed text-paper/70 sm:text-base">Some stories are still waiting to be told.<br/>The filmmaking archive hasn't been developed yet.</p><div className="mt-8 max-w-lg border border-white/40 p-5 font-mono text-[10px] sm:text-xs">{[['REQUEST','/archive/film'],['FILES FOUND','000'],['RESPONSE','AWAITING FIRST FRAME_']].map(([a,b]) => <div className="flex justify-between gap-5 py-2" key={a}><span className="text-paper/50">{a}</span><span className={a==='RESPONSE'?'text-signal':''}>{b}</span></div>)}</div><div className="mt-20 flex justify-between gap-4 border-t border-white/40 pt-3 font-mono text-[10px]"><span>◉ FILM REEL 00:00:00:00</span><span className="text-right">TO BE CONTINUED →</span></div></section>
-}
-
 function Contact() {
-  return <footer id="contact" className="page-gutter bg-signal py-12 md:py-20"><SectionLabel index="05" title="OPEN FOR CONVERSATION" aside="THE NEXT CHAPTER ↗"/><p className="mt-16 font-mono text-xs leading-relaxed">HAVE AN IDEA? SOMETHING TO BUILD?<br/>OR JUST WANT TO SAY HELLO?</p><a className="editorial-heading mt-5 block text-[clamp(68px,13.5vw,190px)] transition-transform duration-300 hover:translate-x-2" href="mailto:hello@example.com">LET'S TALK ↗</a><div className="mt-12 flex flex-wrap items-center justify-between gap-5 border-t border-ink pt-5 font-mono text-[11px]"><a className="inline-flex items-center gap-1 hover:underline" href="https://github.com/mcartv" target="_blank" rel="noreferrer"><Github size={15}/> GITHUB ↗</a><a className="hover:underline" href="https://www.linkedin.com/" target="_blank" rel="noreferrer">LINKEDIN ↗</a><a className="hover:underline" href="#home">BACK TO TOP ↑</a><span>INDEX/ © {new Date().getFullYear()}</span></div><p className="mt-7 font-mono text-[10px] text-ink/70">PRE-PUBLISH CHECKLIST: REPLACE SAMPLE CONTACT DETAILS, BIO, PROJECT DATA AND PROJECT IMAGERY.</p></footer>
+  return <footer id="contact" className="page-gutter bg-signal py-12 md:py-20"><SectionLabel index="05" title="OPEN FOR CONVERSATION" aside="THE NEXT CHAPTER ↗"/><p className="mt-16 font-mono text-xs leading-relaxed">HAVE AN IDEA? SOMETHING TO BUILD?<br/>OR JUST WANT TO SAY HELLO?</p><a className="editorial-heading mt-5 block text-[clamp(68px,13.5vw,190px)] transition-transform duration-300 hover:translate-x-2" href="mailto:hello@example.com">LET'S TALK ↗</a><div className="mt-12 flex flex-wrap items-center justify-between gap-5 border-t border-ink pt-5 font-mono text-[11px]"><a className="inline-flex items-center gap-1 hover:underline" href="https://github.com/mcartv" target="_blank" rel="noreferrer"><Github size={15}/> GITHUB ↗</a>{profile.linkedinUrl ? <a className="hover:underline" href={profile.linkedinUrl} target="_blank" rel="noreferrer">LINKEDIN ↗</a> : <span title="Set linkedinUrl in src/data/profile.js">LINKEDIN / PROFILE PENDING</span>}<a className="hover:underline" href="#home">BACK TO TOP ↑</a><span>INDEX/ © {new Date().getFullYear()}</span></div><p className="mt-7 font-mono text-[10px] text-ink/70">PRE-PUBLISH CHECKLIST: REPLACE SAMPLE CONTACT DETAILS, BIO, PROJECT DATA AND PROJECT IMAGERY.</p></footer>
 }
 
 export default function App() {
   const [progress,setProgress] = useState(0)
+  const [filmOpen,setFilmOpen] = useState(false)
+  const [certificatesOpen,setCertificatesOpen] = useState(false)
   useEffect(() => {
     let raf = 0
     const update = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { const range = document.documentElement.scrollHeight - window.innerHeight; setProgress(range > 0 ? Math.min(100, Math.max(0, window.scrollY / range * 100)) : 0) }) }
@@ -285,12 +302,9 @@ export default function App() {
       '#work .section-label', '#work > .mt-10',
       '#work .carousel-stage', '#work .controls',
       '#tools .section-label', '#tools .grid',
-      '#film .section-label',
-      '#film .error-code', '#film h2', '#film .terminal',
       '#contact .section-label', '#contact .editorial-heading',
     ]
-    // Film's own markup uses a mono directory label rather than .film-label.
-    selectors.push('#film > p', '#contact > p')
+    selectors.push('#contact > p')
     const elements = [...document.querySelectorAll(selectors.join(','))]
     let lastY = window.scrollY
     let direction = 1
@@ -325,5 +339,5 @@ export default function App() {
     }
   }, [])
 
-  return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar/><main><Hero/><About/><Work/><Toolkit/><Film/></main><Contact/></>
+  return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar onFilmOpen={() => setFilmOpen(true)}/><main><Hero/><About onCertificatesOpen={() => setCertificatesOpen(true)}/><Work/><Toolkit/></main><Contact/><FilmWindow open={filmOpen} onClose={() => setFilmOpen(false)}/><CertificatesWindow open={certificatesOpen} onClose={() => setCertificatesOpen(false)}/></>
 }
