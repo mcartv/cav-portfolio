@@ -4,7 +4,6 @@ import { profile } from '../data/profile'
 
 function usePanelFocus(open, onClose) {
   const panelRef = useRef(null)
-  const triggerRef = useRef(null)
   useEffect(() => {
     if (!open) return undefined
     const previous = document.activeElement
@@ -42,16 +41,23 @@ export function DragHandle({ kind, onOpen, className = '' }) {
     didDrag.current = false
     event.currentTarget.setPointerCapture?.(event.pointerId)
   }
+  const resetPull = element => element.style.removeProperty('--drag-pull')
+  const onPointerMove = event => {
+    if (originX.current === null) return
+    const delta = Math.min(0, Math.max(-75, event.clientX - originX.current))
+    event.currentTarget.style.setProperty('--drag-pull', delta + 'px')
+  }
   const onPointerUp = event => {
     if (originX.current === null) return
     const delta = event.clientX - originX.current
     originX.current = null
+    resetPull(event.currentTarget)
     if (delta < -45) { didDrag.current = true; onOpen() }
   }
   return (
     <button type="button" aria-label={isFilm ? 'Open filmmaking portfolio. Click or drag left.' : 'Open certificates archive. Click or drag left.'}
       className={'drawer-handle inline-flex items-center gap-2 border border-ink bg-paper px-3 py-2 font-mono text-[10px] tracking-wider shadow-[4px_4px_0_#1919191c] transition-colors hover:bg-ink hover:text-paper ' + className}
-      onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { originX.current = null }}
+      onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={event => { originX.current = null; resetPull(event.currentTarget) }}
       onClick={() => { if (didDrag.current) { didDrag.current = false; return } onOpen() }}>
       <Grip size={13} strokeWidth={1.5}/><span>{isFilm ? 'FILM / 02' : 'CERTIFICATES'}</span><ArrowLeft size={14}/>
     </button>
