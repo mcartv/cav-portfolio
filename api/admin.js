@@ -7,6 +7,18 @@ const OWNER = 'mcartv'
 const REPO = 'mcartv/cav-portfolio'
 const BRANCH = 'main'
 const CONTENT = { profile: 'src/data/profile.json', projects: 'src/data/projects.json' }
+const FIXED_CARD = Object.freeze({
+  slug: 'coming-soon', title: 'More projects to come', type: 'THE NEXT CHAPTER',
+  year: '—', color: '#E8E5DC', light: '#F4F1E8',
+  description: 'The archive is still growing.', summary: '', stack: [],
+  mark: '…', link: null, placeholder: true,
+})
+const numberCard = i => String(i + 1).padStart(2,'0')
+function canonicalProjects(data) {
+  const real = data.filter(p => p.slug !== 'coming-soon' && !p.placeholder)
+  return [...real.map((p,i) => ({...p,id:numberCard(i),placeholder:false})),
+    {...FIXED_CARD,id:numberCard(real.length)}]
+}
 const TTL = 4 * 60 * 60
 const response = (res, code, data) => res.status(code).json(data)
 const site = () => (process.env.ADMIN_SITE_URL || '').replace(/\/$/, '')
@@ -59,10 +71,21 @@ function validData(name, data) {
       && data.learning.length <= 100
       && data.learning.every(item => item && typeof item.title === 'string' && typeof item.issuer === 'string' && typeof item.date === 'string' && (!item.image || typeof item.image === 'string'))
   }
-  return Array.isArray(data) && data.length >= 1 && data.length <= 30
-    && data.every(item => item && typeof item.id === 'string' && typeof item.slug === 'string'
-      && typeof item.title === 'string' && typeof item.summary === 'string'
-      && Array.isArray(item.stack) && typeof item.color === 'string' && typeof item.mark === 'string')
+  if (!Array.isArray(data) || data.length < 2 || data.length > 30) return false
+  const last = data[data.length - 1]
+  if (!last || last.slug !== 'coming-soon' || !last.placeholder ||
+      data.filter(p => p?.slug === 'coming-soon' || p?.placeholder).length !== 1) return false
+  const real = data.slice(0,-1)
+  const slugs = real.map(p => p?.slug)
+  if (new Set(slugs).size !== slugs.length) return false
+  return real.every(item => item && typeof item.slug === 'string' && /^[a-z0-9][a-z0-9-]{1,70}$/.test(item.slug)
+    && typeof item.title === 'string' && item.title.length <= 120
+    && typeof item.summary === 'string' && item.summary.length <= 6000
+    && typeof item.description === 'string' && item.description.length <= 600
+    && typeof item.type === 'string' && typeof item.year === 'string'
+    && /^#[0-9a-fA-F]{6}$/.test(item.color) && /^#[0-9a-fA-F]{6}$/.test(item.light)
+    && Array.isArray(item.stack) && item.stack.length <= 30 && item.stack.every(x => typeof x === 'string')
+    && typeof item.mark === 'string' && item.mark.length <= 12)
 }
 function validImage(file) {
   if (!file || typeof file.content !== 'string' || typeof file.name !== 'string') return false
@@ -138,7 +161,7 @@ export default async function handler(req, res) {
       const file = await github(session.token,'repos/' + REPO + '/contents/' + CONTENT[name], {
         method:'PUT',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({message:'content: update ' + name + ' via portfolio editor',
-          content:Buffer.from(JSON.stringify(data,null,2) + '\n').toString('base64'),sha,branch:BRANCH}),
+          content:Buffer.from(JSON.stringify(name==='projects'?canonicalProjects(data):data,null,2) + '\n').toString('base64'),sha,branch:BRANCH}),
       })
       return response(res,200,{ok:true,sha:file.content.sha,commit:file.commit.sha})
     }
