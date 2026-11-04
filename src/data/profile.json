@@ -1,0 +1,45 @@
+{
+  "displayName": "CARL ARTHUR V BUENAVIDEZ",
+  "headline": "4th Year BS Information Technology Student",
+  "location": "Philippines",
+  "linkedinUrl": "",
+  "photoUrl": "",
+  "githubUrl": "https://github.com/mcartv",
+  "resumeUrl": "",
+  "introduction": "I enjoy creating digital experiences that balance thoughtful design and functional engineering. My work spans full-stack applications, creative coding, and problem-solving through technology.",
+  "focus": [
+    "Web & mobile development",
+    "Creative interfaces",
+    "Software systems",
+    "Visual storytelling"
+  ],
+  "education": [
+    {
+      "label": "EDUCATION",
+      "title": "Bachelor of Science in Information Technology",
+      "detail": "Pambayang Dalubhasaan ng Marilao · 2022 - Present",
+      "placeholder": false
+    }
+  ],
+  "experience": [],
+  "learning": [
+    {
+      "label": "COURSE",
+      "title": "Operating Systems Basics",
+      "issuer": "Cisco Networking Academy",
+      "date": "2025-05-15",
+      "url": "/certificates/mw1yq3ej-49f6d723-operatingsystemsbasics.jpg",
+      "image": "/certificates/mw1yq3ej-49f6d723-operatingsystemsbasics.jpg",
+      "placeholder": false
+    },
+    {
+      "label": "CERTIFICATION",
+      "title": "AWS Cloud Practitioner Essentials",
+      "issuer": "AWS Training & Certification",
+      "date": "2025-11-04",
+      "url": "/certificates/mw1ys3ab-93364afd-aws_cloud_practitioner_essentials.jpg",
+      "image": "/certificates/mw1ys3ab-93364afd-aws_cloud_practitioner_essentials.jpg",
+      "placeholder": false
+    }
+  ]
+}

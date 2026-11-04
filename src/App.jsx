@@ -3,6 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Asterisk, Github, Menu,
 import { projects } from './data/projects'
 import { profile } from './data/profile'
 import { DragHandle, FilmWindow, CertificatesWindow } from './components/ArchiveWindows'
+import SpaceInvaders from './components/SpaceInvaders'
 
 const skills = [
   { number: '01', category: 'FRONTEND', items: 'React, JavaScript, HTML, CSS' },
@@ -14,7 +15,7 @@ const skills = [
 function SectionLabel({ index, title, aside, dark = false }) {
   return (
     <div className={`section-label flex items-start justify-between gap-4 border-t pt-3 font-mono text-[10px] leading-relaxed tracking-wide sm:text-[11px] ${dark ? 'border-white/40' : 'border-ink'}`}>
-      <span>{index} / {title}</span>
+      <span className="section-label-title"><span className="section-label-index">{index}</span> / {title}</span>
       <span className="text-right">{aside}</span>
     </div>
   )
@@ -38,21 +39,46 @@ function Navbar({ onFilmOpen }) {
   )
 }
 
-function Hero() {
+const PLANE_PIXELS = [
+  '000000010000000',
+  '000000111000000',
+  '000000111000000',
+  '000000111000000',
+  '000011111110000',
+  '011111111111110',
+  '111111111111111',
+  '001111111111100',
+  '000000111000000',
+  '000001111100000',
+  '000011111110000',
+  '000001111100000',
+]
+function PixelPlane({onClick,count}) {
+  return <button type="button" onClick={onClick} className="pixel-plane group relative inline-flex h-10 w-10 shrink-0 items-center justify-center opacity-40 transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100 sm:h-11 sm:w-11" aria-label="A tiny pixel aircraft. Try tapping it repeatedly." title="A curious little aircraft">
+    <svg width="27" height="27" viewBox="0 0 15 12" aria-hidden="true" shapeRendering="crispEdges" className="pixel-plane-art" fill="currentColor">
+      {PLANE_PIXELS.flatMap((row,y)=>[...row].map((pixel,x)=>pixel==='1'?<rect key={y+'-'+x} x={x} y={y} width="1" height="1"/>:null))}
+    </svg>
+    {count>1&&<span className="plane-activation absolute -bottom-1 right-0 font-mono text-[8px] text-signal">{count}/5</span>}
+  </button>
+}
+
+function Hero({onPlaneClick,planeCount}) {
   return (
-    <section id="home" className="page-gutter hero flex min-h-[min(820px,calc(100svh-70px))] flex-col justify-between py-8">
+    <section id="home" className="page-gutter hero relative isolate flex min-h-[min(820px,calc(100svh-70px))] flex-col justify-between overflow-hidden py-8">
+      <div className="hero-architectural pointer-events-none absolute inset-0 -z-10" aria-hidden="true"><span className="hero-architectural-ring"/><span className="hero-architectural-cross">+</span><span className="hero-architectural-index">DESIGN ARCHIVE / 001</span></div>
       <div className="flex justify-between gap-4 font-mono text-[9px] tracking-wider sm:text-[11px]"><span>[ PORTFOLIO — VOL. 001 ]</span><span className="text-right">DESIGN × TECHNOLOGY × STORYTELLING</span></div>
-      <div className="hero-headline my-16" aria-label="Crafting digital things that matter">
+      <div className="hero-headline relative my-16" aria-label="Crafting digital things that matter">
         <h1>CRAFTING</h1>
         <h1>DIGITAL <em>THINGS.</em></h1>
         <h1>THAT <span className="outline-word">MATTER.</span></h1>
+        <div className="hero-seal pointer-events-none absolute -bottom-12 right-1 hidden h-28 w-28 items-center justify-center rounded-full border border-ink/40 bg-paper/80 sm:flex lg:-bottom-16 lg:right-10 lg:h-36 lg:w-36" aria-hidden="true"><span className="hero-seal-orbit"/><span className="relative text-center font-mono text-[9px] leading-[1.75] tracking-[.16em]">CRAFT<br/>IN<br/>MOTION <span className="text-signal">✳</span></span></div>
       </div>
       <div>
         <div className="flex items-end justify-between gap-5">
-          <div className="max-w-sm"><span className="font-mono text-[11px] text-signal">HELLO, I'M A CREATIVE DEVELOPER.</span><p className="mt-3 text-sm leading-relaxed sm:text-lg">Building considered digital experiences and exploring stories through a different lens.</p></div>
+          <div className="max-w-sm"><span className="hero-kicker font-mono text-[11px] text-signal"><span className="status-dot"/> HELLO, I'M A CREATIVE DEVELOPER.</span><p className="mt-3 text-sm leading-relaxed sm:text-lg">Building considered digital experiences and exploring stories through a different lens.</p></div>
           <a href="#work" aria-label="Explore selected work" className="circle-link shrink-0"><ArrowDown strokeWidth={1.5} size={30}/></a>
         </div>
-        <div className="mt-10 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>CURATED DIGITAL ARCHIVE</span><span>SCROLL TO EXPLORE ↓</span></div>
+        <div className="mt-10 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>CURATED DIGITAL ARCHIVE</span><span className="flex items-center gap-3">SCROLL TO EXPLORE <span className="scroll-cue">↓</span><PixelPlane onClick={onPlaneClick} count={planeCount}/></span></div>
       </div>
     </section>
   )
@@ -69,7 +95,7 @@ function About({ onCertificatesOpen }) {
       <div className="grid gap-8 pt-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-14">
         <div>
           <figure className="profile-portrait mb-9 w-full max-w-[360px]">
-            <div className="relative aspect-square overflow-hidden border border-ink/70 bg-[#dcded2]">
+            <div className="profile-image-surface relative aspect-square overflow-hidden border border-ink/70 bg-[#dcded2]">
               {profile.photoUrl ? <img src={profile.photoUrl} alt="Profile portrait" className="h-full w-full object-cover" loading="lazy"/> : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[#7c8876]">
                   <svg viewBox="0 0 200 200" className="w-1/2" role="img" aria-label="Abstract portrait placeholder"><circle cx="100" cy="68" r="35" fill="currentColor"/><path d="M34 180c0-46 26-70 66-70s66 24 66 70" fill="currentColor"/><circle cx="100" cy="100" r="91" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="3 7"/></svg>
@@ -104,7 +130,8 @@ function About({ onCertificatesOpen }) {
 
 function ProjectArtwork({ project }) {
   return (
-    <div className="artwork relative grid min-h-0 flex-1 place-items-center overflow-hidden" style={{ backgroundColor: project.color }}>
+    <div className="artwork project-artwork relative grid min-h-0 flex-1 place-items-center overflow-hidden" style={{ backgroundColor: project.color }}>
+      <div className="artwork-grid pointer-events-none absolute inset-0" aria-hidden="true"/><div className="artwork-sheen pointer-events-none absolute inset-0" aria-hidden="true"/>
       <div className="art-orbit absolute inset-[12%] rounded-full border border-ink/20"/>
       <div className="art-orbit absolute inset-[23%] rounded-full border border-dashed border-ink/30"/>
       <div className="art-window relative flex h-[65%] w-[73%] rotate-[-7deg] flex-col border border-ink bg-[#faf9f3] p-3 shadow-[12px_13px_0px_#00000017]">
@@ -113,6 +140,7 @@ function ProjectArtwork({ project }) {
         <div className="font-mono text-[8px] tracking-wide">{project.slug.toUpperCase()}</div>
       </div>
       <span className="absolute bottom-3 right-3 font-mono text-[9px]">ARCHIVE / {project.id}</span>
+      <span className="artwork-coordinate absolute left-3 top-3 font-mono text-[8px] tracking-widest" aria-hidden="true">N° {project.id} — INDEX</span>
     </div>
   )
 }
@@ -253,7 +281,7 @@ function Work() {
   const move = delta => setActive(current => (current + delta + projects.length) % projects.length)
   const onKey = e => { if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1) } if (e.key === 'ArrowRight') { e.preventDefault(); move(1) } }
   return (
-    <section id="work" className="page-gutter overflow-hidden py-12 md:py-20">
+    <section id="work" className="page-gutter work-section relative overflow-hidden py-12 md:py-20">
       <SectionLabel index="02" title="SELECTED PROJECTS" aside={`DEVELOPMENT ARCHIVE [ ${String(projects.length).padStart(2,'0')} ]`}/>
       <div className="japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div>
       <div className="mt-10 flex items-end justify-between gap-4"><h2 className="editorial-heading text-[clamp(70px,11vw,160px)]">SELECTED<br/><em className="text-signal">WORK.</em></h2><p className="mb-3 hidden max-w-44 font-mono text-[11px] leading-relaxed md:block">AN INTERACTIVE COLLECTION OF THINGS I'VE BUILT & EXPLORED.</p></div>
@@ -272,7 +300,7 @@ function Work() {
       </div>
       <div className="mx-auto mt-5 flex max-w-3xl items-center justify-between gap-3">
         <button className="circle-link shrink-0" onClick={() => move(-1)} aria-label="Previous project"><ArrowLeft strokeWidth={1.4}/></button>
-        <div className="min-w-0 text-center" aria-live="polite" aria-atomic="true"><div className="font-mono text-[10px] text-signal">{live.id} / {String(projects.length).padStart(2,'0')}</div><h3 className="mt-2 truncate text-xl font-extrabold tracking-[-.05em] sm:text-3xl">{live.title}</h3><p className="mt-2 max-w-md text-xs text-ink/70 sm:text-sm">{live.description}</p><button className="mt-3 inline-flex items-center gap-1 border-b border-ink font-mono text-[10px] hover:text-signal" onClick={() => openProject(live, document.querySelector('.project-card[aria-current="true"]'))}>EXPLORE PROJECT <ArrowUpRight size={13}/></button></div>
+        <div className="project-caption min-w-0 text-center" aria-live="polite" aria-atomic="true"><div className="font-mono text-[10px] text-signal">{live.id} / {String(projects.length).padStart(2,'0')}</div><h3 className="mt-2 truncate text-xl font-extrabold tracking-[-.05em] sm:text-3xl">{live.title}</h3><p className="mt-2 max-w-md text-xs text-ink/70 sm:text-sm">{live.description}</p><button className="mt-3 inline-flex items-center gap-1 border-b border-ink font-mono text-[10px] hover:text-signal" onClick={() => openProject(live, document.querySelector('.project-card[aria-current="true"]'))}>EXPLORE PROJECT <ArrowUpRight size={13}/></button></div>
         <button className="circle-link shrink-0" onClick={() => move(1)} aria-label="Next project"><ArrowRight strokeWidth={1.4}/></button>
       </div>
       <div className="mt-12 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>← ARROWS / SWIPE TO ROTATE →</span><span className="text-right">GITHUB REPOSITORIES / CURATED PREVIEWS</span></div>
@@ -283,21 +311,57 @@ function Work() {
 }
 
 function Toolkit() {
-  return <section id="tools" className="page-gutter bg-stonewash py-12 md:py-20"><SectionLabel index="03" title="SKILLS AND WORKFLOW" aside="THE TOOLKIT"/><div className="japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div><div className="mt-14 grid gap-10 md:grid-cols-2"><h2 className="editorial-heading text-[clamp(48px,7vw,110px)]">TOOLS OF<br/><span className="text-signal">THE TRADE.</span></h2><div>{skills.map(skill => <div key={skill.number} className="grid grid-cols-[95px_1fr_20px] items-center gap-2 border-b border-ink py-5 first:border-t sm:grid-cols-[145px_1fr_20px]"><span className="font-mono text-[10px]">{skill.number} / {skill.category}</span><strong className="text-sm sm:text-base">{skill.items}</strong><ArrowUpRight size={16}/></div>)}</div></div></section>
+  return <section id="tools" className="page-gutter bg-stonewash py-12 md:py-20"><SectionLabel index="03" title="SKILLS AND WORKFLOW" aside="THE TOOLKIT"/><div className="japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div><div className="mt-14 grid gap-10 md:grid-cols-2"><h2 className="editorial-heading text-[clamp(48px,7vw,110px)]">TOOLS OF<br/><span className="text-signal">THE TRADE.</span></h2><div>{skills.map(skill => <div key={skill.number} className="skill-row group grid grid-cols-[95px_1fr_20px] items-center gap-2 border-b border-ink py-5 first:border-t sm:grid-cols-[145px_1fr_20px]"><span className="font-mono text-[10px]">{skill.number} / {skill.category}</span><strong className="text-sm sm:text-base">{skill.items}</strong><ArrowUpRight size={16}/></div>)}</div></div></section>
 }
 
 function Contact() {
-  return <footer id="contact" className="page-gutter bg-signal py-12 md:py-20"><SectionLabel index="05" title="OPEN FOR CONVERSATION" aside="THE NEXT CHAPTER ↗"/><p className="mt-16 font-mono text-xs leading-relaxed">HAVE AN IDEA? SOMETHING TO BUILD?<br/>OR JUST WANT TO SAY HELLO?</p><a className="editorial-heading mt-5 block text-[clamp(68px,13.5vw,190px)] transition-transform duration-300 hover:translate-x-2" href="mailto:hello@example.com">LET'S TALK ↗</a><div className="mt-12 flex flex-wrap items-center justify-between gap-5 border-t border-ink pt-5 font-mono text-[11px]"><a className="inline-flex items-center gap-1 hover:underline" href="https://github.com/mcartv" target="_blank" rel="noreferrer"><Github size={15}/> GITHUB ↗</a>{profile.linkedinUrl ? <a className="hover:underline" href={profile.linkedinUrl} target="_blank" rel="noreferrer">LINKEDIN ↗</a> : <span title="Set linkedinUrl in src/data/profile.js">LINKEDIN / PROFILE PENDING</span>}<a className="hover:underline" href="#home">BACK TO TOP ↑</a><span>INDEX/ © {new Date().getFullYear()}</span></div><p className="mt-7 font-mono text-[10px] text-ink/70">PRE-PUBLISH CHECKLIST: REPLACE SAMPLE CONTACT DETAILS, BIO, PROJECT DATA AND PROJECT IMAGERY.</p></footer>
+  return <footer id="contact" className="page-gutter bg-signal py-12 md:py-20"><SectionLabel index="05" title="OPEN FOR CONVERSATION" aside="THE NEXT CHAPTER ↗"/><p className="mt-16 font-mono text-xs leading-relaxed">HAVE AN IDEA? SOMETHING TO BUILD?<br/>OR JUST WANT TO SAY HELLO?</p><a className="contact-headline editorial-heading mt-5 block text-[clamp(68px,13.5vw,190px)]" href="mailto:hello@example.com">LET'S TALK ↗</a><div className="mt-12 flex flex-wrap items-center justify-between gap-5 border-t border-ink pt-5 font-mono text-[11px]"><a className="inline-flex items-center gap-1 hover:underline" href="https://github.com/mcartv" target="_blank" rel="noreferrer"><Github size={15}/> GITHUB ↗</a>{profile.linkedinUrl ? <a className="hover:underline" href={profile.linkedinUrl} target="_blank" rel="noreferrer">LINKEDIN ↗</a> : <span title="Set linkedinUrl in src/data/profile.js">LINKEDIN / PROFILE PENDING</span>}<a className="hover:underline" href="#home">BACK TO TOP ↑</a><span>INDEX/ © {new Date().getFullYear()}</span></div><p className="mt-7 font-mono text-[10px] text-ink/70">PRE-PUBLISH CHECKLIST: REPLACE SAMPLE CONTACT DETAILS, BIO, PROJECT DATA AND PROJECT IMAGERY.</p></footer>
 }
 
 export default function App() {
   const [progress,setProgress] = useState(0)
   const [filmOpen,setFilmOpen] = useState(false)
   const [certificatesOpen,setCertificatesOpen] = useState(false)
+  const [arcadePhase,setArcadePhase] = useState('idle')
+  const [planeCount,setPlaneCount] = useState(0)
+  const planeClicks = useRef(0)
+  const easterTimer = useRef(null)
   const openFilm = useCallback(() => setFilmOpen(true), [])
   const closeFilm = useCallback(() => setFilmOpen(false), [])
   const openCertificates = useCallback(() => setCertificatesOpen(true), [])
   const closeCertificates = useCallback(() => setCertificatesOpen(false), [])
+  const onPlaneClick = useCallback(() => {
+    if(arcadePhase!=='idle')return
+    window.clearTimeout(easterTimer.current)
+    planeClicks.current += 1
+    if(planeClicks.current>=5){
+      planeClicks.current=0
+      setPlaneCount(0)
+      setArcadePhase('ejecting')
+      return
+    }
+    setPlaneCount(planeClicks.current)
+    easterTimer.current=window.setTimeout(()=>{planeClicks.current=0;setPlaneCount(0)},6000)
+  },[arcadePhase])
+  const exitArcade=useCallback(()=>setArcadePhase('returning'),[])
+  useEffect(()=>()=>window.clearTimeout(easterTimer.current),[])
+  useEffect(()=>{
+    if(arcadePhase!=='returning')return undefined
+    const timer=window.setTimeout(()=>setArcadePhase('idle'),780)
+    return ()=>window.clearTimeout(timer)
+  },[arcadePhase])
+  useEffect(()=>{
+    if(arcadePhase!=='ejecting')return undefined
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const timer=window.setTimeout(()=>setArcadePhase('playing'),reduced?40:1350)
+    return ()=>window.clearTimeout(timer)
+  },[arcadePhase])
+  useEffect(()=>{
+    if(arcadePhase==='idle')return undefined
+    const before=document.body.style.overflow
+    document.body.style.overflow='hidden'
+    return ()=>{document.body.style.overflow=before}
+  },[arcadePhase])
   useEffect(() => {
     let raf = 0
     const update = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { const range = document.documentElement.scrollHeight - window.innerHeight; setProgress(range > 0 ? Math.min(100, Math.max(0, window.scrollY / range * 100)) : 0) }) }
@@ -355,5 +419,15 @@ export default function App() {
     }
   }, [])
 
-  return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar onFilmOpen={openFilm}/><main><Hero/><About onCertificatesOpen={openCertificates}/><Work/><Toolkit/></main><Contact/><FilmWindow open={filmOpen} onClose={closeFilm}/><CertificatesWindow open={certificatesOpen} onClose={closeCertificates}/></>
+  return <>
+    <div className={'portfolio-world '+(arcadePhase==='ejecting'||arcadePhase==='playing'?'is-ejecting':arcadePhase==='returning'?'is-returning':'')}>
+      <div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/>
+      <Navbar onFilmOpen={openFilm}/>
+      <main><Hero onPlaneClick={onPlaneClick} planeCount={planeCount}/><About onCertificatesOpen={openCertificates}/><Work/><Toolkit/></main>
+      <Contact/>
+    </div>
+    <FilmWindow open={filmOpen} onClose={closeFilm}/>
+    <CertificatesWindow open={certificatesOpen} onClose={closeCertificates}/>
+    {arcadePhase==='playing'&&<SpaceInvaders onExit={exitArcade}/>}
+  </>
 }
