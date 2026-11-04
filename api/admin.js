@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
+import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 
 // Git-backed portfolio CMS. No database; writes are GitHub commits.
 // Required Vercel env: GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_CLIENT_SECRET,
@@ -97,8 +97,8 @@ export default async function handler(req, res) {
       const state = unseal(cookies(req).portfolio_oauth || '')
       res.setHeader('Set-Cookie', cookie('portfolio_oauth','',0))
       const given = typeof req.query.state === 'string' ? req.query.state : ''
-      if (!state || state.exp < Date.now() || !given ||
-          !timingSafeEqual(Buffer.from(state.state), Buffer.from(given.padEnd(state.state.length,' ').slice(0,state.state.length)))) {
+      if (!state || state.exp < Date.now() || given.length !== state.state.length ||
+          !timingSafeEqual(Buffer.from(state.state), Buffer.from(given))) {
         return response(res,403,{error:'Invalid authorization state'})
       }
       if (!req.query.code || req.query.error) return response(res,403,{error:'GitHub authorization cancelled'})
