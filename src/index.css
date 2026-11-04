@@ -163,16 +163,52 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .drawer-layer.is-open .drawer-surface { transform: translate3d(0, 0, 0); }
 .drawer-handle { touch-action: pan-y; user-select: none; transform: translateX(var(--drag-pull, 0px)); transition: background-color .25s, color .25s, transform .18s ease-out; }
 .drawer-handle:active { cursor: grabbing; }
-.film-secret-tab {
-  box-shadow: inset 0 0 0 1px #ffffff40;
-  border-radius: 2px;
-  touch-action: none;
+.film-edge-position {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  z-index: 2;
 }
-.film-secret-tab:hover { background-color: #deddd3; box-shadow: 2px 2px 0 #19191918; }
-.secret-tab-lines { display: flex; flex-direction: column; gap: 3px; }
-.secret-tab-lines i { display: block; width: 12px; height: 1px; background: currentColor; opacity: .63; }
-.secret-tab-lines i:nth-child(2) { width: 9px; }
-.secret-tab-lines i:nth-child(3) { width: 6px; }
+.film-secret-tab {
+  width: 55px;
+  height: 33px;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: var(--color-paper);
+  box-shadow: none;
+  touch-action: none;
+  cursor: grab;
+  gap: 5px;
+  /* A notch in the navbar rule, not a separate floating button. */
+}
+.film-secret-tab:hover, .film-secret-tab:focus-visible {
+  background: #eae8df;
+  color: #191919;
+}
+.secret-tab-lines {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  opacity: .26;
+  transition: opacity .2s;
+}
+.secret-tab-lines i {
+  display: block;
+  width: 13px;
+  height: 1px;
+  background: currentColor;
+}
+.secret-tab-lines i:nth-child(2) { width: 8px; }
+.secret-tab-arrow { opacity: 0; transform: translateX(3px); transition: opacity .22s, transform .22s; }
+.film-secret-tab:hover .secret-tab-arrow,
+.film-secret-tab:focus-visible .secret-tab-arrow { opacity: .65; transform: translateX(0); }
+.film-secret-tab:hover .secret-tab-lines { opacity: .6; }
+@media (max-width: 640px) {
+  .film-secret-tab { width: 37px; height: 30px; }
+}
 .drawer-panel-header { touch-action: pan-y; user-select: none; }
 .film-window { overscroll-behavior: contain; }
 .film-window-content { isolation: isolate; }
