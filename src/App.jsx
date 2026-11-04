@@ -68,7 +68,19 @@ function About({ onCertificatesOpen }) {
       </div>
       <div className="grid gap-8 pt-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-14">
         <div>
-          <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[#999c8c] bg-[#dedfd4] text-[#62705c]"><Asterisk size={54} strokeWidth={1.1}/></div>
+          <figure className="profile-portrait mb-9 w-full max-w-[360px]">
+            <div className="relative aspect-square overflow-hidden border border-ink/70 bg-[#dcded2]">
+              {profile.photoUrl ? <img src={profile.photoUrl} alt="Profile portrait" className="h-full w-full object-cover" loading="lazy"/> : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[#7c8876]">
+                  <svg viewBox="0 0 200 200" className="w-1/2" role="img" aria-label="Abstract portrait placeholder"><circle cx="100" cy="68" r="35" fill="currentColor"/><path d="M34 180c0-46 26-70 66-70s66 24 66 70" fill="currentColor"/><circle cx="100" cy="100" r="91" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="3 7"/></svg>
+                  <span className="font-mono text-[10px] tracking-[.18em]">YOUR PHOTO HERE</span>
+                </div>
+              )}
+              <span className="absolute right-3 top-3 font-mono text-[10px] text-ink/50">1:1</span>
+              <span className="absolute bottom-3 left-3 font-mono text-[9px] text-ink/50">FIG. 01 / PORTRAIT</span>
+            </div>
+            <figcaption className="mt-2 font-mono text-[9px] tracking-widest text-ink/50">PERSONAL ARCHIVE / IMAGE 001</figcaption>
+          </figure>
           <span className="font-mono text-[11px] text-ink/60">INTRODUCING / {profile.location.toUpperCase()}</span>
           <h2 className="editorial-heading mt-4 text-[clamp(45px,6vw,88px)]">MORE THAN<br/>JUST <span className="font-serif font-normal italic text-signal">code.</span></h2>
           <p className="mt-6 max-w-sm text-base leading-[1.8]">{profile.introduction}</p>
