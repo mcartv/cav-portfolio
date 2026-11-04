@@ -24,7 +24,7 @@ function SelectField({label,value,options,onChange}) {
   return <label className="block min-w-0"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">{label}</span><select className={inputClass} value={value||''} onChange={e=>onChange(e.target.value)}>{!options.includes(value)&&value&&<option value={value}>{value}</option>}{options.map(o=><option value={o} key={o}>{o}</option>)}</select></label>
 }
 function DateField({label,value,onChange}) {
-  const valid = /^\\d{4}-\\d{2}-\\d{2}$/.test(value||'')
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(value||'')
   return <label className="block min-w-0"><span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-[#696960]">{label}</span><input type="date" className={inputClass} value={valid?value:''} onChange={e=>onChange(e.target.value)}/>{value&&!valid&&<span className="mt-1 block text-[10px] text-[#9b533d]">Previous date: {value}. Select a date to replace it.</span>}</label>
 }
 function ColorField({label,value,onChange}) {
