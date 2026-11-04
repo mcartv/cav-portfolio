@@ -122,6 +122,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
   from { opacity: .3; transform: translateY(20px) scale(.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* Quiet Japandi-inspired detailing: paper, ink, an enso ring, and restrained dividers. */
+.japandi-divider { display: flex; align-items: center; gap: 15px; color: #888878; }
+.japandi-divider::before, .japandi-divider::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, #a4a092, #d4d0c4); }
+.japandi-divider::after { transform: rotate(180deg); }
+.japandi-mark { font-family: Georgia, serif; font-size: 22px; line-height: 1; transform: rotate(-14deg); }
+.enso-ring { width: 148px; height: 148px; border-radius: 50%; border: 13px solid rgba(94,105,82,.4); border-left-color: transparent; border-bottom-color: rgba(94,105,82,.16); transform: rotate(-28deg); position: absolute; }
+.coming-soon-art { background-image: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 55%); }
+.archive-toast { animation: toast-arrive .45s cubic-bezier(.17,.8,.2,1) both; }
+@keyframes toast-arrive { from { opacity: 0; transform: translate(-50%, 22px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .error-code { font-size: clamp(150px, 25vw, 360px); }
 @keyframes rise-in { from { transform: translateY(44px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @media (max-width: 640px) {
@@ -135,5 +144,6 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .scroll-motion { opacity: 1 !important; transform: none !important; }
   .flip-object, .expanded-project, .ui-preview { animation: none !important; transform: none !important; }
+  .archive-toast { animation: none !important; transform: translateX(-50%) !important; }
   .project-card:hover, .project-card:focus-visible { --hover-rise: 0px; --hover-tilt: 0deg; }
 }
