@@ -282,6 +282,10 @@ export default function App() {
   const [progress,setProgress] = useState(0)
   const [filmOpen,setFilmOpen] = useState(false)
   const [certificatesOpen,setCertificatesOpen] = useState(false)
+  const openFilm = useCallback(() => setFilmOpen(true), [])
+  const closeFilm = useCallback(() => setFilmOpen(false), [])
+  const openCertificates = useCallback(() => setCertificatesOpen(true), [])
+  const closeCertificates = useCallback(() => setCertificatesOpen(false), [])
   useEffect(() => {
     let raf = 0
     const update = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { const range = document.documentElement.scrollHeight - window.innerHeight; setProgress(range > 0 ? Math.min(100, Math.max(0, window.scrollY / range * 100)) : 0) }) }
@@ -339,5 +343,5 @@ export default function App() {
     }
   }, [])
 
-  return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar onFilmOpen={() => setFilmOpen(true)}/><main><Hero/><About onCertificatesOpen={() => setCertificatesOpen(true)}/><Work/><Toolkit/></main><Contact/><FilmWindow open={filmOpen} onClose={() => setFilmOpen(false)}/><CertificatesWindow open={certificatesOpen} onClose={() => setCertificatesOpen(false)}/></>
+  return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar onFilmOpen={openFilm}/><main><Hero/><About onCertificatesOpen={openCertificates}/><Work/><Toolkit/></main><Contact/><FilmWindow open={filmOpen} onClose={closeFilm}/><CertificatesWindow open={certificatesOpen} onClose={closeCertificates}/></>
 }
