@@ -3,6 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Asterisk, Github, Menu,
 import { projects } from './data/projects'
 import { profile } from './data/profile'
 import { DragHandle, FilmWindow, CertificatesWindow } from './components/ArchiveWindows'
+import SpaceInvaders from './components/SpaceInvaders'
 
 const skills = [
   { number: '01', category: 'FRONTEND', items: 'React, JavaScript, HTML, CSS' },
@@ -38,20 +39,30 @@ function Navbar({ onFilmOpen }) {
   )
 }
 
-function MotionTicker() {
-  const message = ['CRAFTED WITH INTENTION', 'BUILT FOR HUMAN INTERACTION', 'DESIGN IS IN THE DETAILS', 'ALWAYS IN PROGRESS']
-  return (
-    <div className="motion-ticker relative overflow-hidden border-y border-ink bg-ink py-[14px] text-paper" aria-label={message.join(' — ')}>
-      <div className="motion-ticker-track flex w-max items-center" aria-hidden="true">
-        {[0, 1, 2, 3].map(n => <div key={n} className="flex shrink-0 items-center gap-7 pr-7">
-          {message.map(item => <span className="flex shrink-0 items-center gap-7 font-mono text-[10px] tracking-[.2em] sm:text-[11px]" key={item}><span className="ticker-star">✳</span>{item}</span>)}
-        </div>)}
-      </div>
-    </div>
-  )
+const PLANE_PIXELS = [
+  '000000010000000',
+  '000000111000000',
+  '000000111000000',
+  '000000111000000',
+  '000011111110000',
+  '011111111111110',
+  '111111111111111',
+  '001111111111100',
+  '000000111000000',
+  '000001111100000',
+  '000011111110000',
+  '000001111100000',
+]
+function PixelPlane({onClick,count}) {
+  return <button type="button" onClick={onClick} className="pixel-plane group relative inline-flex h-10 w-10 shrink-0 items-center justify-center opacity-40 transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100 sm:h-11 sm:w-11" aria-label="A tiny pixel aircraft. Try tapping it repeatedly." title="A curious little aircraft">
+    <svg width="27" height="27" viewBox="0 0 15 12" aria-hidden="true" shapeRendering="crispEdges" className="pixel-plane-art" fill="currentColor">
+      {PLANE_PIXELS.flatMap((row,y)=>[...row].map((pixel,x)=>pixel==='1'?<rect key={y+'-'+x} x={x} y={y} width="1" height="1"/>:null))}
+    </svg>
+    {count>1&&<span className="plane-activation absolute -bottom-1 right-0 font-mono text-[8px] text-signal">{count}/5</span>}
+  </button>
 }
 
-function Hero() {
+function Hero({onPlaneClick,planeCount}) {
   return (
     <section id="home" className="page-gutter hero relative isolate flex min-h-[min(820px,calc(100svh-70px))] flex-col justify-between overflow-hidden py-8">
       <div className="hero-architectural pointer-events-none absolute inset-0 -z-10" aria-hidden="true"><span className="hero-architectural-ring"/><span className="hero-architectural-cross">+</span><span className="hero-architectural-index">DESIGN ARCHIVE / 001</span></div>
@@ -67,7 +78,7 @@ function Hero() {
           <div className="max-w-sm"><span className="hero-kicker font-mono text-[11px] text-signal"><span className="status-dot"/> HELLO, I'M A CREATIVE DEVELOPER.</span><p className="mt-3 text-sm leading-relaxed sm:text-lg">Building considered digital experiences and exploring stories through a different lens.</p></div>
           <a href="#work" aria-label="Explore selected work" className="circle-link shrink-0"><ArrowDown strokeWidth={1.5} size={30}/></a>
         </div>
-        <div className="mt-10 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>CURATED DIGITAL ARCHIVE</span><span className="flex items-center gap-2">SCROLL TO EXPLORE <span className="scroll-cue">↓</span></span></div>
+        <div className="mt-10 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>CURATED DIGITAL ARCHIVE</span><span className="flex items-center gap-3">SCROLL TO EXPLORE <span className="scroll-cue">↓</span><PixelPlane onClick={onPlaneClick} count={planeCount}/></span></div>
       </div>
     </section>
   )
@@ -311,10 +322,39 @@ export default function App() {
   const [progress,setProgress] = useState(0)
   const [filmOpen,setFilmOpen] = useState(false)
   const [certificatesOpen,setCertificatesOpen] = useState(false)
+  const [arcadePhase,setArcadePhase] = useState('idle')
+  const [planeCount,setPlaneCount] = useState(0)
+  const easterTimer = useRef(null)
   const openFilm = useCallback(() => setFilmOpen(true), [])
   const closeFilm = useCallback(() => setFilmOpen(false), [])
   const openCertificates = useCallback(() => setCertificatesOpen(true), [])
   const closeCertificates = useCallback(() => setCertificatesOpen(false), [])
+  const onPlaneClick = useCallback(() => {
+    if(arcadePhase!=='idle')return
+    window.clearTimeout(easterTimer.current)
+    setPlaneCount(n=>{
+      if(n>=4){
+        window.setTimeout(()=>setArcadePhase('ejecting'),0)
+        return 0
+      }
+      return n+1
+    })
+    easterTimer.current=window.setTimeout(()=>setPlaneCount(0),6000)
+  },[arcadePhase])
+  const exitArcade=useCallback(()=>setArcadePhase('idle'),[])
+  useEffect(()=>()=>window.clearTimeout(easterTimer.current),[])
+  useEffect(()=>{
+    if(arcadePhase!=='ejecting')return undefined
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const timer=window.setTimeout(()=>setArcadePhase('playing'),reduced?40:1350)
+    return ()=>window.clearTimeout(timer)
+  },[arcadePhase])
+  useEffect(()=>{
+    if(arcadePhase==='idle')return undefined
+    const before=document.body.style.overflow
+    document.body.style.overflow='hidden'
+    return ()=>{document.body.style.overflow=before}
+  },[arcadePhase])
   useEffect(() => {
     let raf = 0
     const update = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { const range = document.documentElement.scrollHeight - window.innerHeight; setProgress(range > 0 ? Math.min(100, Math.max(0, window.scrollY / range * 100)) : 0) }) }
@@ -372,5 +412,15 @@ export default function App() {
     }
   }, [])
 
-  return <><div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/><Navbar onFilmOpen={openFilm}/><main><Hero/><MotionTicker/><About onCertificatesOpen={openCertificates}/><Work/><Toolkit/></main><Contact/><FilmWindow open={filmOpen} onClose={closeFilm}/><CertificatesWindow open={certificatesOpen} onClose={closeCertificates}/></>
+  return <>
+    <div className={'portfolio-world '+(arcadePhase==='ejecting'||arcadePhase==='playing'?'is-ejecting':'')}>
+      <div aria-hidden="true" className="fixed left-0 top-0 z-[120] h-[3px] bg-signal" style={{width:`${progress}%`}}/>
+      <Navbar onFilmOpen={openFilm}/>
+      <main><Hero onPlaneClick={onPlaneClick} planeCount={planeCount}/><About onCertificatesOpen={openCertificates}/><Work/><Toolkit/></main>
+      <Contact/>
+    </div>
+    <FilmWindow open={filmOpen} onClose={closeFilm}/>
+    <CertificatesWindow open={certificatesOpen} onClose={closeCertificates}/>
+    {arcadePhase==='playing'&&<SpaceInvaders onExit={exitArcade}/>}
+  </>
 }
