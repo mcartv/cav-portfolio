@@ -243,11 +243,55 @@ a:focus-visible,
 .hero-kicker { display: inline-flex; align-items: center; gap: 9px; }
 .status-dot { width: 7px; height: 7px; border-radius:50%; background:currentColor; box-shadow: 0 0 0 0 rgba(243,77,49,.3); animation: active-pulse 3s ease-out infinite; }
 .scroll-cue { font-size: 17px; display: inline-block; animation: scroll-nudge 2s ease-in-out infinite; }
-.motion-ticker { isolation:isolate; }
-.motion-ticker::after { content:'';pointer-events:none;position:absolute;inset:0;background:linear-gradient(90deg,#191919 0%,transparent 6%,transparent 94%,#191919 100%); }
-.motion-ticker-track { animation: marquee-loop 33s linear infinite; }
-.ticker-star { color:#f34d31; font-size: 18px; }
-@keyframes marquee-loop { to { transform: translateX(-50%); } }
+/* A tiny, almost-hidden pixel aircraft replaces the scrolling marquee. */
+.pixel-plane { color: rgba(28,40,39,.66); -webkit-tap-highlight-color:transparent; }
+.pixel-plane-art { image-rendering:pixelated; transform:rotate(-18deg); transition: transform .5s cubic-bezier(.17,.8,.2,1),filter .4s ease; }
+.pixel-plane:hover .pixel-plane-art,.pixel-plane:focus-visible .pixel-plane-art {transform:rotate(-18deg) translate(4px,-4px) scale(1.13);filter:drop-shadow(-3px 3px 0 rgba(243,77,49,.28));}
+.pixel-plane:active .pixel-plane-art {transform:rotate(-18deg) translate(7px,-8px) scale(.95);}
+.plane-activation { animation: plane-signal .25s ease both; }
+@keyframes plane-signal {from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Arcade easter egg: every major section departs with its own direction and timing. */
+.portfolio-world {position:relative;isolation:isolate;transition:background-color .6s;}
+.portfolio-world.is-ejecting {background-color:#040a10;}
+.portfolio-world.is-ejecting .site-header {animation:arcade-exit-left 1.12s .03s cubic-bezier(.64,.04,.8,.27) forwards;}
+.portfolio-world.is-ejecting .hero {animation:arcade-exit-right 1.18s .06s cubic-bezier(.64,.04,.8,.27) forwards;}
+.portfolio-world.is-ejecting #about {animation:arcade-exit-left 1.07s .17s cubic-bezier(.64,.04,.8,.27) forwards;}
+.portfolio-world.is-ejecting #work {animation:arcade-exit-right 1.1s .22s cubic-bezier(.64,.04,.8,.27) forwards;}
+.portfolio-world.is-ejecting #tools {animation:arcade-exit-left 1.1s .27s cubic-bezier(.64,.04,.8,.27) forwards;}
+.portfolio-world.is-ejecting #contact {animation:arcade-exit-right 1.1s .32s cubic-bezier(.64,.04,.8,.27) forwards;}
+.portfolio-world.is-ejecting .hero-headline h1:nth-child(odd) {animation:arcade-exit-left .9s .04s ease-in forwards;}
+.portfolio-world.is-ejecting .hero-headline h1:nth-child(even) {animation:arcade-exit-right .85s .08s ease-in forwards;}
+.portfolio-world.is-ejecting .hero > div:last-child {animation:arcade-exit-left .9s .13s ease-in forwards;}
+.portfolio-world.is-ejecting .fixed[aria-hidden="true"] {opacity:0;transition:opacity .4s;}
+@keyframes arcade-exit-left {0%{transform:translate3d(0,0,0);opacity:1}17%{transform:translate3d(20px,0,0);opacity:1}100%{transform:translate3d(-120vw,0,0);opacity:0}}
+@keyframes arcade-exit-right {0%{transform:translate3d(0,0,0);opacity:1}17%{transform:translate3d(-20px,0,0);opacity:1}100%{transform:translate3d(120vw,0,0);opacity:0}}
+.portfolio-world.is-returning .site-header,.portfolio-world.is-returning #about,.portfolio-world.is-returning #tools {animation:arcade-return-left .75s cubic-bezier(.16,1,.3,1) both;}
+.portfolio-world.is-returning .hero,.portfolio-world.is-returning #work,.portfolio-world.is-returning #contact {animation:arcade-return-right .75s cubic-bezier(.16,1,.3,1) both;}
+@keyframes arcade-return-left {from{transform:translate3d(-12vw,0,0);opacity:0}to{transform:translate3d(0,0,0);opacity:1}}
+@keyframes arcade-return-right {from{transform:translate3d(12vw,0,0);opacity:0}to{transform:translate3d(0,0,0);opacity:1}}
+
+/* Actual canvas game, with analog phosphor and CRT touches. */
+.arcade-root {font-family:'DM Sans',sans-serif;overscroll-behavior:contain;animation:arcade-appear .38s ease-out both;}
+.arcade-root:focus {outline:none;}
+.arcade-scanlines {
+  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,.12) 4px);
+  opacity:.55;mix-blend-mode:multiply;
+}
+.arcade-cabinet {isolation:isolate;}
+.arcade-cabinet::after {content:'';position:absolute;inset:0;pointer-events:none;z-index:10;box-shadow:inset 0 0 50px rgba(0,0,0,.44);}
+.arcade-cabinet canvas {image-rendering:pixelated;max-height:min(62vh,620px);object-fit:contain;}
+.arcade-touch-control {
+  min-width:76px;min-height:62px;
+  border:1px solid #75928b;background:#142a30;
+  font:700 15px 'DM Mono',monospace;color:#d4ebe1;
+  touch-action:none;user-select:none;
+  transition:background-color .12s,transform .12s;
+}
+.arcade-touch-control:active {background:#39685e;transform:translateY(2px);}
+.arcade-fire {border-color:#b66f62;background:#3c2729;color:#ffd0c3;}
+.arcade-fire:active {background:#87443b;}
+@keyframes arcade-appear {from{opacity:0;filter:brightness(2)}to{opacity:1;filter:brightness(1)}}
 @keyframes slow-orbit { to { transform: rotate(360deg); } }
 @keyframes seal-breathe { 0%,100% { transform: translateY(0); } 50% { transform:translateY(-10px); } }
 @keyframes scroll-nudge { 0%,100% { transform:translateY(-3px);opacity:.65; } 55% { transform:translateY(4px);opacity:1; } }
@@ -291,14 +335,14 @@ a:focus-visible,
   .hero-architectural-ring {right:-40%;top:18%;opacity:.55;}
   .hero-seal {display:none;}
   .work-section::before {display:none;}
-  .motion-ticker-track {animation-duration:45s;}
+
 }
 @media(prefers-reduced-motion: reduce){
   .hero-architectural-ring,.hero-seal,.hero-seal-orbit,.scroll-cue,.status-dot,
-  .motion-ticker-track,.profile-portrait::after,.profile-image-surface svg,.artwork-sheen {
+  .profile-portrait::after,.profile-image-surface svg,.artwork-sheen {
     animation:none!important;
   }
-  .motion-ticker-track {transform:none!important;}
+  .portfolio-world.is-ejecting .site-header,.portfolio-world.is-ejecting .hero,.portfolio-world.is-ejecting #about,.portfolio-world.is-ejecting #work,.portfolio-world.is-ejecting #tools,.portfolio-world.is-ejecting #contact {animation-duration:.01ms!important;}
   .project-card::after{transition:none!important;}
 }
 
