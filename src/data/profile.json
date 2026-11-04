@@ -24,31 +24,22 @@
   "experience": [],
   "learning": [
     {
-      "label": "COURSE / CERTIFICATE",
-      "title": "Add your first certificate",
-      "issuer": "Course provider",
-      "date": "Date earned",
-      "url": "",
-      "image": "",
-      "placeholder": true
-    },
-    {
-      "label": "SEMINAR",
-      "title": "Add a seminar or workshop",
-      "issuer": "Event organizer",
-      "date": "Date attended",
-      "url": "",
-      "image": "",
-      "placeholder": true
+      "label": "COURSE",
+      "title": "Operating Systems Basics",
+      "issuer": "Cisco Networking Academy",
+      "date": "May 15, 2025",
+      "url": "/certificates/mw1yq3ej-49f6d723-operatingsystemsbasics.jpg",
+      "image": "/certificates/mw1yq3ej-49f6d723-operatingsystemsbasics.jpg",
+      "placeholder": false
     },
     {
       "label": "CERTIFICATION",
-      "title": "More credentials will appear here",
-      "issuer": "Additional professional learning",
-      "date": "—",
-      "url": "",
-      "image": "",
-      "placeholder": true
+      "title": "AWS Cloud Practitioner Essentials",
+      "issuer": "AWS Training & Certification",
+      "date": "November 04, 2025",
+      "url": "/certificates/mw1ys3ab-93364afd-aws_cloud_practitioner_essentials.jpg",
+      "image": "/certificates/mw1ys3ab-93364afd-aws_cloud_practitioner_essentials.jpg",
+      "placeholder": false
     }
   ]
 }
