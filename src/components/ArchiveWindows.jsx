@@ -57,10 +57,10 @@ export function DragHandle({ kind, onOpen, className = '' }) {
   return (
     <button type="button" aria-label={isFilm ? 'Open filmmaking portfolio. Click or drag left.' : 'Open certificates archive. Click or drag left.'}
       title={isFilm ? 'An unusual detail. Try pulling it to the left.' : 'Pull left to browse certificates'}
-      className={(isFilm ? 'drawer-handle film-secret-tab group inline-flex h-8 w-[48px] items-center justify-center gap-[5px] border border-[#97988e] bg-[#eeede6] text-[#73756d] transition-all hover:border-ink hover:text-ink focus-visible:border-ink ' : 'drawer-handle inline-flex items-center gap-2 border border-ink bg-paper px-3 py-2 font-mono text-[10px] tracking-wider shadow-[4px_4px_0_#1919191c] transition-colors hover:bg-ink hover:text-paper ') + className}
+      className={(isFilm ? 'drawer-handle film-secret-tab group inline-flex items-center justify-center border border-ink/65 bg-paper text-ink/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal ' : 'drawer-handle inline-flex items-center gap-2 border border-ink bg-paper px-3 py-2 font-mono text-[10px] tracking-wider shadow-[4px_4px_0_#1919191c] transition-colors hover:bg-ink hover:text-paper ') + className}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={event => { originX.current = null; resetPull(event.currentTarget) }}
       onClick={() => { if (didDrag.current) { didDrag.current = false; return } onOpen() }}>
-      {isFilm ? <><span aria-hidden="true" className="secret-tab-lines"><i/><i/><i/></span><ArrowLeft size={11} strokeWidth={1.3} className="opacity-50 transition-transform group-hover:-translate-x-[2px]"/></> : <><Grip size={13} strokeWidth={1.5}/><span>CERTIFICATES</span><ArrowLeft size={14}/></>}
+      {isFilm ? <><span aria-hidden="true" className="secret-tab-lines"><i/><i/></span><ArrowLeft size={11} strokeWidth={1.3} className="secret-tab-arrow"/></> : <><Grip size={13} strokeWidth={1.5}/><span>CERTIFICATES</span><ArrowLeft size={14}/></>}
     </button>
   )
 }
