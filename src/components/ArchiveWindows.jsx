@@ -121,6 +121,7 @@ export function CertificatesWindow({ open, onClose }) {
             {profile.learning.map((entry,i) => (
               <article className="certificate-entry border border-[#aaa596] bg-[#f8f6f0] p-5 sm:p-7" key={i}>
                 <div className="flex items-start justify-between gap-3 font-mono text-[10px] text-[#77766c]"><span>{String(i+1).padStart(2,'0')} / {entry.label}</span><span>{entry.date}</span></div>
+                {entry.image && <a href={entry.url || entry.image} target="_blank" rel="noopener noreferrer" aria-label={'View certificate: ' + entry.title} className="mt-5 block overflow-hidden border border-[#aaa596] bg-white"><img src={entry.image} alt={'Certificate: ' + entry.title} loading="lazy" className="h-auto max-h-[460px] w-full object-contain transition-transform duration-500 hover:scale-[1.025]"/></a>}
                 <h3 className="mt-6 text-xl font-bold tracking-tight sm:text-2xl">{entry.title}</h3>
                 <p className="mt-2 text-sm text-[#66665f]">{entry.issuer}</p>
                 {entry.url ? <a className="mt-6 inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-[10px]" href={entry.url} target="_blank" rel="noopener noreferrer">VIEW CERTIFICATE <ArrowUpRight size={14}/></a> : <div className="mt-6 font-mono text-[10px] text-[#8c877c]">DOCUMENT TO BE ADDED ↗</div>}
