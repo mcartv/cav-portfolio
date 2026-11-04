@@ -24,7 +24,7 @@ function Navbar({ onFilmOpen }) {
   const [open, setOpen] = useState(false)
   const links = [['ABOUT', '#about'], ['WORK', '#work'], ['CONTACT', '#contact']]
   return (
-    <header className="site-header relative z-50 flex items-center justify-between gap-4 border-b border-ink px-[5%] py-4 sm:py-5">
+    <header className="site-header relative z-50 flex items-center justify-between gap-4 border-b border-ink pl-[5%] pr-[calc(5%+38px)] py-4 sm:pr-[74px] sm:py-5">
       <a href="#home" aria-label="INDEX portfolio home" className="font-black text-3xl tracking-[-.11em]">INDEX<span className="text-signal">/</span></a>
       <span className="hidden font-mono text-[10px] tracking-wider lg:block">CREATIVE DEVELOPER — PORTFOLIO 2026</span>
       <button className="md:hidden p-2" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)}>
@@ -32,8 +32,8 @@ function Navbar({ onFilmOpen }) {
       </button>
       <nav aria-label="Main navigation" className={`${open ? 'flex' : 'hidden'} absolute top-full left-0 right-0 flex-col gap-5 border-b border-ink bg-paper px-[5%] py-7 font-mono text-xs md:static md:flex md:flex-row md:items-center md:gap-5 md:border-0 md:bg-transparent md:p-0`}>
         {links.map(([name, href]) => <a key={name} href={href} className="transition-colors hover:text-signal focus-visible:text-signal" onClick={() => setOpen(false)}>{name}</a>)}
-        <DragHandle kind="film" onOpen={() => { setOpen(false); onFilmOpen() }} className="self-start md:ml-2"/>
       </nav>
+      <DragHandle kind="film" onOpen={() => { setOpen(false); onFilmOpen() }} className="film-edge-position"/>
     </header>
   )
 }
