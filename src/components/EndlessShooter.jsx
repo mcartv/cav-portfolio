@@ -601,9 +601,9 @@ export default function EndlessShooter({ onExit }) {
           p.y += p.vy * dt;
           p.t -= dt;
         });
-        g.particles = g.particles.filter((p) => p.t > 0);
+        g.particles = g.particles.filter((p) => p.t > 0).slice(-450);
         g.effects.forEach((e) => (e.life -= dt));
-        g.effects = g.effects.filter((e) => e.life > 0);
+        g.effects = g.effects.filter((e) => e.life > 0).slice(-80);
         g.uiClock += dt;
         if (g.uiClock > 0.17 || g.phase === "over") {
           g.uiClock = 0;
@@ -632,6 +632,8 @@ export default function EndlessShooter({ onExit }) {
       });
       ctx.fillStyle = "#061019";
       ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      if (g.shake > 0) ctx.translate((Math.random()-.5)*g.shake,(Math.random()-.5)*g.shake);
       ctx.strokeStyle = "rgba(98,164,165,.07)";
       for (let y = 22; y < H; y += 30) {
         ctx.beginPath();
@@ -651,13 +653,20 @@ export default function EndlessShooter({ onExit }) {
       ctx.textAlign = "left";
       for (const e of g.enemies) {
         if (e.boss) {
-          const color = e.slowUntil > g.elapsed ? "#8be4f2" : "#ff9d7d";
+          const color = e.flash > 0 ? "#ffffff" : e.slowUntil > g.elapsed ? "#8be4f2" : e.phase === 2 ? "#ff536e" : "#ff9d7d";
+          if (e.phase === 2) {
+            ctx.fillStyle = "rgba(255,71,99,.09)";
+            ctx.fillRect(e.x-53,e.y-42,106,80);
+            ctx.strokeStyle="#ff6079";
+            ctx.lineWidth=2;
+            ctx.strokeRect(e.x-45,e.y-29,90,58);
+          }
           sprite(ctx, ELITE, e.x - 20, e.y - 20, 5.2, color);
 
           ctx.fillStyle = "#3a2730";
           ctx.fillRect(e.x - 48, e.y - 34, 96, 6);
 
-          ctx.fillStyle = "#ff9d7d";
+          ctx.fillStyle = e.phase === 2 ? "#ff536e" : "#ff9d7d";
           ctx.fillRect(e.x - 48, e.y - 34, 96 * Math.max(0, e.hp / e.maxHp), 6);
 
           ctx.strokeStyle = "#ffd0ba";
@@ -665,7 +674,7 @@ export default function EndlessShooter({ onExit }) {
         } else {
           const size = e.elite ? 3.9 : 3.2;
           const shape = e.elite ? ELITE : ENEMY;
-          const color =
+          const color = e.flash > 0 ? "#ffffff" :
             e.slowUntil > g.elapsed
               ? "#80dcf2"
               : e.elite
@@ -690,7 +699,8 @@ export default function EndlessShooter({ onExit }) {
               : b.kind === "blast"
                 ? "#fc977d"
                 : "#eaf8dc";
-        ctx.fillRect(b.x - 2, b.y - 7, 4, 14);
+        ctx.fillRect(b.x - (b.kind==="pierce"&&b.tier===2?3:2), b.y - 7, b.kind==="pierce"&&b.tier===2?6:4, 14);
+        if(b.kind){ctx.globalAlpha=.18;ctx.fillRect(b.x-6,b.y-12,12,24);ctx.globalAlpha=1;}
       }
       ctx.fillStyle = "#f48b7c";
       g.enemyShots.forEach((b) => ctx.fillRect(b.x - 2, b.y - 4, 4, 10));
@@ -708,12 +718,17 @@ export default function EndlessShooter({ onExit }) {
         ctx.textAlign = "left";
       }
       for (const e of g.effects) {
-        const t = e.life / 0.32;
-        ctx.strokeStyle = "rgba(251,156,112," + t + ")";
-        ctx.lineWidth = 3;
+        const t = clamp(e.life / (e.maxLife || .32),0,1);
+        ctx.globalAlpha=t;
+        ctx.strokeStyle=e.color || (e.boss ? "#ffaf8b" : "#fb9c70");
+        ctx.lineWidth=e.boss?5:3;
         ctx.beginPath();
-        ctx.arc(e.x, e.y, (1 - t) * 80, 0, Math.PI * 2);
+        ctx.arc(e.x,e.y,(1-t)*(e.radius||82),0,Math.PI*2);
         ctx.stroke();
+        if(e.boss){
+          ctx.beginPath();ctx.arc(e.x,e.y,(1-t)*55,0,Math.PI*2);ctx.stroke();
+        }
+        ctx.globalAlpha=1;
       }
       for (const p of g.particles) {
         ctx.globalAlpha = clamp(p.t * 2, 0, 1);
@@ -732,9 +747,23 @@ export default function EndlessShooter({ onExit }) {
         );
         drawActiveShipEffect(ctx, g);
       }
+      if(g.bannerTime>0) {
+        ctx.fillStyle="rgba(4,12,18,.88)";
+        ctx.fillRect(16,44,W-32,35);
+        ctx.strokeStyle=g.banner.includes("MOTHERSHIP")||g.banner.includes("PHASE")?"#f77977":"#80cfba";
+        ctx.strokeRect(16,44,W-32,35);
+        ctx.fillStyle="#eaf6ed";ctx.font="bold 13px monospace";ctx.textAlign="center";
+        ctx.fillText(g.banner,W/2,66);ctx.textAlign="left";
+      }
+      if(g.weaponFlash>0) {
+        ctx.globalAlpha=Math.min(.25,g.weaponFlash*.19);
+        ctx.fillStyle=g.active?POWER[g.active].color:"#ffffff";
+        ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+      }
       ctx.fillStyle = "#648a86";
       ctx.font = "10px monospace";
       ctx.fillText("INDEX / ENDLESS MODE", 14, H - 9);
+      ctx.restore();
       frame = window.requestAnimationFrame(render);
     };
     frame = window.requestAnimationFrame(render);
@@ -814,8 +843,8 @@ export default function EndlessShooter({ onExit }) {
               </h2>
               <p className="mt-5 max-w-[300px] font-mono text-xs leading-6 text-[#a5c7be]">
                 {view.phase === "over"
-                  ? "SCORE " + view.score + " / BEST " + view.best
-                  : "Dodge, shoot and collect weapon power-ups. Every second increases the threat."}
+                  ? "SCORE " + view.score + " / BEST " + view.best + " / BOSSES " + view.bossKills
+                  : "Collect the same power-up twice to evolve it. Every minute brings a boss with a second attack phase."}
               </p>
               <button
                 onClick={start}
@@ -841,7 +870,7 @@ export default function EndlessShooter({ onExit }) {
           <span>BEST {view.best}</span>
           <span>THREAT {view.level}</span>
           <span>LIVES {"♥".repeat(Math.max(0, view.lives))}</span>
-          {game.current?.bossActive && (
+          {view.boss && (
             <div className="mt-2 w-full max-w-[480px] border border-[#6f4340] bg-[#2a1718] px-3 py-2 font-mono text-[10px] tracking-wider text-[#ffb19d]">
               WARNING / BOSS ENCOUNTER ACTIVE
             </div>
@@ -855,10 +884,11 @@ export default function EndlessShooter({ onExit }) {
             }}
           >
             {view.active
-              ? POWER[view.active].label + " / " + view.remaining + "S"
+              ? POWER[view.active].label + " / LV." + view.tier + " / " + view.remaining + "S"
               : "STANDARD / NONE"}
           </span>
         </div>
+        <div className="mt-2 flex w-full max-w-[480px] items-center justify-between gap-2 font-mono text-[10px] tracking-wide text-[#789d95]"><span>TIME {String(Math.floor(view.time/60)).padStart(2,'0')}:{String(view.time%60).padStart(2,'0')}</span><span>BOSSES DEFEATED {view.bossKills}</span></div>
         <div className="mt-4 w-full max-w-[480px]">
           <div className="flex items-center justify-between gap-3 sm:hidden">
             <button
@@ -918,7 +948,7 @@ export default function EndlessShooter({ onExit }) {
                 {POWER[type].symbol} {POWER[type].label}
               </span>
               <p className="mt-1 text-[9px] text-[#7d9d97]">
-                {POWER[type].detail}
+                {POWER[type].detail} · Collect twice for LV.2
               </p>
             </div>
           ))}
