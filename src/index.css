@@ -550,6 +550,59 @@ a:focus-visible,
   }
 }
 
+/* The case study returns to the exact source-card rectangle, then reveals its front face. */
+.project-overlay.overlay-collapsing { backdrop-filter: blur(1.5px); }
+.project-overlay.overlay-reverse {
+  animation: overlay-close .7s .08s ease-in both;
+}
+.expanded-project.case-study-contract {
+  transform-origin: center center;
+  pointer-events: none;
+  animation: case-study-contract .61s cubic-bezier(.55,.05,.7,.34) both;
+  overflow: hidden;
+}
+.case-study-contract .case-sequence {
+  animation: case-content-depart .28s ease-in both;
+}
+.case-study-contract .case-visual-wrap::after { display: none; }
+.case-study-contract::after {
+  content: '';
+  position:absolute;
+  inset:0;
+  z-index:15;
+  pointer-events:none;
+  border:2px solid #191919;
+  background:linear-gradient(90deg,transparent,rgba(243,77,49,.08),transparent);
+  animation: case-close-glint .61s ease-in both;
+}
+.flip-object.flip-object-reverse {
+  animation: flip-to-front .72s cubic-bezier(.16,.8,.23,1) both;
+}
+.flip-object-reverse .flip-front { box-shadow: 0 15px 34px #0004; }
+.flip-object-reverse .flip-back { background-color:#eeeae0; }
+@keyframes case-study-contract {
+  0% { opacity:1;transform:translate3d(0,0,0) rotateY(0deg) scale(1,1);filter:brightness(1); }
+  32% { opacity:1;transform:translate3d(calc(var(--close-x,0px)*.17),calc(var(--close-y,0px)*.17),0) rotateY(-3deg) scale(.94,.95);filter:brightness(.98); }
+  78% { opacity:1; }
+  100% {opacity:0;transform:translate3d(var(--close-x,0px),var(--close-y,0px),0) rotateY(-10deg) scale(var(--close-sx,.27),var(--close-sy,.36));filter:brightness(.88);}
+}
+@keyframes case-content-depart {
+  to { opacity:0;transform:translate3d(0,-12px,0);filter:blur(4px); }
+}
+@keyframes case-close-glint { from {opacity:0} 40% {opacity:1} to {opacity:.8} }
+@keyframes flip-to-front {
+  0% { transform:rotateY(180deg) scale(1.06); }
+  42% { transform:rotateY(91deg) scale(1.025); }
+  100% { transform:rotateY(0deg) scale(1); }
+}
+@keyframes overlay-close {
+  0% {background-color:rgba(10,10,10,.52);backdrop-filter:blur(1.5px);}
+  100% {background-color:rgba(10,10,10,0);backdrop-filter:blur(0);}
+}
+@media(prefers-reduced-motion:reduce) {
+  .expanded-project.case-study-contract,.flip-object.flip-object-reverse,.project-overlay.overlay-reverse {animation:none!important;}
+}
+
 @keyframes preview-settle {
   from {
     opacity: .3;
