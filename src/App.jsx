@@ -274,8 +274,9 @@ function ProjectModal({ selection, onClose }) {
           </div>
         </div>
       ) : (
-        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" ref={modalRef} style={phase==='collapsing'?closeMotion:undefined} className={'expanded-project cinematic-case relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10 '+(phase==='collapsing'?'case-study-contract':'')}>
-          <div className="case-header case-sequence case-sequence-1 sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-ink bg-paper py-3 font-mono text-[10px] sm:text-xs"><span className="min-w-0 truncate">PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={requestClose} disabled={phase==='collapsing'} aria-label="Close project details" className="case-close-button inline-flex h-10 w-10 shrink-0 items-center justify-center border border-ink/50 transition-colors hover:border-ink hover:bg-ink hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"><X size={18}/></button></div>
+        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" ref={modalRef} style={phase==='collapsing'?closeMotion:undefined} className={'expanded-project cinematic-case relative flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden bg-paper shadow-2xl '+(phase==='collapsing'?'case-study-contract':'')}>
+          <div className="case-header case-sequence case-sequence-1 relative z-30 flex shrink-0 items-center justify-between gap-4 border-b border-ink bg-paper px-4 py-3 font-mono text-[10px] sm:px-8 sm:text-xs lg:px-10"><span className="min-w-0 truncate">PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={requestClose} disabled={phase==='collapsing'} aria-label="Close project details" className="case-close-button inline-flex h-10 w-10 shrink-0 items-center justify-center border border-ink/50 transition-colors hover:border-ink hover:bg-ink hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-signal"><X size={18}/></button></div>
+          <div className="case-scroll-region min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-5 sm:px-8 sm:pb-8 lg:px-10 lg:pb-10">
           <div className="case-sequence case-sequence-2 mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
           <h2 id="project-modal-title" className="case-sequence case-sequence-3 editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
           <div className="case-visual-wrap case-sequence case-sequence-4 relative overflow-hidden">
@@ -295,6 +296,7 @@ function ProjectModal({ selection, onClose }) {
             </div>
           </div>}
           <div className="case-sequence case-sequence-6 mt-9 flex flex-wrap gap-x-6 gap-y-3 border-t border-ink/25 pt-6">{project.link && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer"><Github size={15}/> VIEW GITHUB REPOSITORY <ArrowUpRight size={15}/></a>}{project.live && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.live} target="_blank" rel="noopener noreferrer">LIVE APPLICATION <ArrowUpRight size={15}/></a>}</div>
+          </div>
         </section>
       )}
     </div>
