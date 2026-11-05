@@ -401,7 +401,8 @@ Development emphasizes iterative refinement rather than adding features without 
 
 ---
 
-## 11. Author
+
+## 11. Author & Contact
 
 **Carl Arthur V. Buenavidez**
 
@@ -409,11 +410,16 @@ Bachelor of Science in Information Technology
 Pambayang Dalubhasaan ng Marilao  
 Philippines
 
-Interested in full-stack development, interactive interfaces, creative coding, and visual storytelling.
+An aspiring software developer with interests in full-stack development, interactive interfaces, creative coding, and visual storytelling.
 
-**GitHub:** [github.com/mcartv](https://github.com/mcartv)
+### Connect With Me
 
-**Portfolio:** [cav-portfolio.vercel.app](https://cav-portfolio.vercel.app)
+- **Portfolio:** [cav-portfolio.vercel.app](https://cav-portfolio.vercel.app)
+- **GitHub:** [github.com/mcartv](https://github.com/mcartv)
+- **LinkedIn:** [Carl Arthur V. Buenavidez](https://www.linkedin.com/in/carl-arthur-buenavidez/)
+- **Email:** [buenavidezcarlarthur@gmail.com](mailto:buenavidezcarlarthur@gmail.com)
+
+I'm open to opportunities, collaborations, and conversations about software development, creative technology, and digital experiences.
 
 ---
 
@@ -422,6 +428,11 @@ Interested in full-stack development, interactive interfaces, creative coding, a
 ### CRAFTED WITH INTENTION.
 
 *An ongoing exploration of technology, design, and storytelling.*
+
+**INDEX/ © 2026 — Carl Arthur V. Buenavidez**
+
+</div>
+
 
 **INDEX/ © 2026 — Carl Arthur V. Buenavidez**
 
