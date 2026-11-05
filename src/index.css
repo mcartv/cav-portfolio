@@ -346,6 +346,111 @@ a:focus-visible,
   .project-card::after{transition:none!important;}
 }
 
+
+/* Motion polish v2 — quiet magnetism, cursor light and cinematic reveal layers. */
+.magnetic-target {
+  --magnetic-x: 0px;
+  --magnetic-y: 0px;
+  transform: translate3d(var(--magnetic-x),var(--magnetic-y),0);
+  transition: transform .48s cubic-bezier(.16,1,.3,1);
+  will-change: transform;
+}
+.magnetic-target:hover { transition-duration:.22s; }
+.magnetic-target:has(:focus-visible) { transition-duration:.2s; }
+.hero {
+  --hero-x: 75%;
+  --hero-y: 40%;
+  background-image:
+    radial-gradient(ellipse 430px 360px at var(--hero-x) var(--hero-y),rgba(180,185,160,.18),transparent 80%),
+    radial-gradient(ellipse at 83% 45%,rgba(206,210,194,.19),transparent 50%);
+}
+.hero-architectural-ring { transition:opacity .6s ease; }
+.hero:hover .hero-architectural-ring { opacity:.78; }
+.portrait-parallax {
+  --portrait-x: 0px;
+  --portrait-y: 0px;
+  perspective:850px;
+}
+.portrait-parallax img,
+.portrait-parallax > div:first-child svg {
+  transform: translate3d(var(--portrait-x),var(--portrait-y),0) scale(1.025);
+  transition:transform .6s cubic-bezier(.16,1,.3,1),filter .8s ease;
+}
+.portrait-parallax:hover img { transform:translate3d(var(--portrait-x),var(--portrait-y),0) scale(1.075); }
+.portrait-parallax > div:first-child svg { animation:none; }
+.portrait-parallax::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(132deg,rgba(255,255,255,.14),transparent 46%,rgba(25,25,25,.08));
+  transition:opacity .5s ease;
+}
+.portrait-parallax:hover::after { opacity:1; }
+.cinematic-case::before {
+  content:'';
+  position:sticky;
+  top:0;
+  z-index:12;
+  display:block;
+  height:3px;
+  width:100%;
+  background:linear-gradient(90deg,#f34d31 0%,#bfac9b 55%,transparent 85%);
+  transform:scaleX(0);
+  transform-origin:left;
+  animation:case-rule-write .95s .25s cubic-bezier(.16,1,.3,1) forwards;
+}
+.case-sequence {
+  opacity:0;
+  transform:translate3d(0,22px,0);
+  animation:case-detail-in .75s cubic-bezier(.16,1,.3,1) both;
+}
+.case-sequence-1 { animation-delay:.14s; }
+.case-sequence-2 { animation-delay:.22s; }
+.case-sequence-3 { animation-delay:.31s; }
+.case-sequence-4 { animation-delay:.42s; }
+.case-sequence-5 { animation-delay:.57s; }
+.case-sequence-6 { animation-delay:.68s; }
+.case-visual-wrap { isolation:isolate; }
+.case-visual-wrap::after {
+  content:'';
+  pointer-events:none;
+  position:absolute;
+  z-index:4;
+  inset:0;
+  background:#e6e4dc;
+  transform:translate3d(0,0,0);
+  transform-origin:right center;
+  animation:case-curtain .85s .5s cubic-bezier(.16,1,.3,1) both;
+}
+.case-visual-wrap .ui-preview {
+  animation:case-visual-focus 1s .45s cubic-bezier(.16,1,.3,1) both;
+}
+.case-visual-index { backdrop-filter:blur(8px); }
+@keyframes case-detail-in {
+  from { opacity:0;transform:translate3d(0,22px,0);filter:blur(3px); }
+  to { opacity:1;transform:translate3d(0,0,0);filter:blur(0); }
+}
+@keyframes case-curtain {
+  0% { transform:scaleX(1); }
+  100% { transform:scaleX(0); }
+}
+@keyframes case-visual-focus {
+  from { transform:scale(1.045);filter:grayscale(.3); }
+  to { transform:scale(1);filter:grayscale(0); }
+}
+@keyframes case-rule-write { to { transform:scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-target { transform:none!important; }
+  .portrait-parallax img,.portrait-parallax > div:first-child svg { transform:none!important; }
+  .case-sequence { opacity:1!important; transform:none!important; filter:none!important;animation:none!important; }
+  .case-visual-wrap::after { display:none!important; }
+  .case-visual-wrap .ui-preview { animation:none!important;transform:none!important;filter:none!important; }
+  .cinematic-case::before { transform:scaleX(1);animation:none!important; }
+}
+
 /* Flip the selected card to its reverse before expanding into the case study. */
 .project-overlay {
   background-color: rgba(10, 10, 10, .52);
