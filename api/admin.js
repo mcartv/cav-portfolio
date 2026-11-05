@@ -73,8 +73,8 @@ function validData(name, data) {
       && (data.films == null || (Array.isArray(data.films) && data.films.length <= 30 && data.films.every(film =>
         film && typeof film.title === 'string' && film.title.length <= 150
         && ['year','format','role','description'].every(field => film[field] == null || (typeof film[field] === 'string' && film[field].length <= (field === 'description' ? 3000 : 200)))
-        && (film.poster == null || (typeof film.poster === 'string' && (film.poster === '' || /^\\/films\\/[a-zA-Z0-9._-]+\\.(?:jpg|jpeg|png|webp)$/.test(film.poster))))
-        && (film.link == null || (typeof film.link === 'string' && (film.link === '' || /^https:\\/\\//.test(film.link))))
+        && (film.poster == null || (typeof film.poster === 'string' && (film.poster === '' || /^\/films\/[a-zA-Z0-9._-]+\.(?:jpg|jpeg|png|webp)$/.test(film.poster))))
+        && (film.link == null || (typeof film.link === 'string' && (film.link === '' || /^https:\/\//.test(film.link))))
       )))
   }
   if (!Array.isArray(data) || data.length < 2 || data.length > 30) return false
