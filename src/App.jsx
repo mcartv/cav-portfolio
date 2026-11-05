@@ -89,14 +89,14 @@ function Hero({onPlaneClick,planeCount}) {
 function About({ onCertificatesOpen }) {
   return (
     <section id="about" className="page-gutter bg-stonewash py-10 md:py-20">
-      <SectionLabel index="01" title="THE PERSON BEHIND THE SCREEN" aside="ABOUT / CURRICULUM VITAE"/>
-      <div className="mt-10 flex items-center justify-between gap-4 border-b border-ink/25 pb-5">
+      <div data-story="rule" className="story-rule"><SectionLabel index="01" title="THE PERSON BEHIND THE SCREEN" aside="ABOUT / CURRICULUM VITAE"/></div>
+      <div data-story="fade" className="story-enter mt-10 flex items-center justify-between gap-4 border-b border-ink/25 pb-5">
         <span className="font-mono text-[10px] tracking-widest text-ink/60">THE HUMAN BEHIND THE CODE</span>
         <DragHandle kind="certificates" onOpen={onCertificatesOpen}/>
       </div>
       <div className="grid gap-8 pt-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-14">
         <div>
-          <figure className="profile-portrait mb-9 w-full max-w-[360px]">
+          <figure data-story="portrait" className="profile-portrait story-portrait mb-9 w-full max-w-[360px]">
             <div className="profile-image-surface portrait-parallax relative aspect-square overflow-hidden border border-ink/70 bg-[#dcded2]" onPointerMove={event => { if(event.pointerType!=='mouse'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return; const rect=event.currentTarget.getBoundingClientRect();event.currentTarget.style.setProperty('--portrait-x',((event.clientX-rect.left)/rect.width-.5)*13+'px');event.currentTarget.style.setProperty('--portrait-y',((event.clientY-rect.top)/rect.height-.5)*13+'px') }} onPointerLeave={event => { event.currentTarget.style.setProperty('--portrait-x','0px');event.currentTarget.style.setProperty('--portrait-y','0px') }}>
               {profile.photoUrl ? <img src={profile.photoUrl} alt="Profile portrait" className="h-full w-full object-cover" loading="lazy"/> : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[#7c8876]">
@@ -109,21 +109,21 @@ function About({ onCertificatesOpen }) {
             </div>
             <figcaption className="mt-2 font-mono text-[9px] tracking-widest text-ink/50">PERSONAL ARCHIVE / IMAGE 001</figcaption>
           </figure>
-          <span className="font-mono text-[11px] text-ink/60">INTRODUCING / {profile.location.toUpperCase()}</span>
-          <h2 className="editorial-heading mt-4 text-[clamp(45px,6vw,88px)]">MORE THAN<br/>JUST <span className="font-serif font-normal italic text-signal">code.</span></h2>
-          <p className="mt-6 max-w-sm text-base leading-[1.8]">{profile.introduction}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <span data-story="fade" className="story-enter inline-block font-mono text-[11px] text-ink/60">INTRODUCING / {profile.location.toUpperCase()}</span>
+          <h2 data-story="headline" className="story-headline editorial-heading mt-4 text-[clamp(45px,6vw,88px)]"><span className="story-line"><span>MORE THAN</span></span><span className="story-line"><span>JUST <span className="font-serif font-normal italic text-signal">code.</span></span></span></h2>
+          <p data-story="fade" className="story-enter mt-6 max-w-sm text-base leading-[1.8]">{profile.introduction}</p>
+          <div data-story="fade" className="story-enter mt-8 flex flex-wrap gap-3">
             <a className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal" href={profile.githubUrl} target="_blank" rel="noopener noreferrer"><Github size={16}/> GITHUB <ArrowUpRight size={13}/></a>
             {profile.linkedinUrl ? <a className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal" href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer">LINKEDIN <ArrowUpRight size={13}/></a> : <span className="border-b border-dashed border-ink/40 pb-2 font-mono text-[11px] text-ink/50" title="Set linkedinUrl in src/data/profile.js">LINKEDIN — ADD PROFILE URL</span>}
             {profile.resumeUrl && <a className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal" href={profile.resumeUrl} target="_blank" rel="noopener noreferrer">RESUME PDF <ArrowUpRight size={13}/></a>}
           </div>
         </div>
         <div className="space-y-8">
-          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">00 / PROFILE</span><h3 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">{profile.displayName}</h3><p className="mt-1 text-sm">{profile.headline}</p></div>
-          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">01 / WHAT I DO</span><div className="mt-5 grid gap-3 sm:grid-cols-2">{profile.focus.map((focus,i) => <div className="flex gap-3 border-b border-ink/20 pb-3 text-sm" key={focus}><span className="font-mono text-[10px] text-ink/50">0{i+1}</span><span>{focus}</span></div>)}</div></div>
-          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">02 / EDUCATION</span>{profile.education.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
-          <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">03 / EXPERIENCE</span>{profile.experience.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
-          <Magnetic className="w-full" strength={0.045}><button onClick={onCertificatesOpen} className="group flex w-full items-center justify-between border border-ink px-5 py-4 text-left font-mono text-[11px] transition-colors hover:bg-ink hover:text-paper"><span>VIEW COURSES & CERTIFICATES</span><ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1"/></button></Magnetic>
+          <div data-story="aside" className="story-aside border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">00 / PROFILE</span><h3 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">{profile.displayName}</h3><p className="mt-1 text-sm">{profile.headline}</p></div>
+          <div data-story="aside" className="story-aside border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">01 / WHAT I DO</span><div className="mt-5 grid gap-3 sm:grid-cols-2">{profile.focus.map((focus,i) => <div className="flex gap-3 border-b border-ink/20 pb-3 text-sm" key={focus}><span className="font-mono text-[10px] text-ink/50">0{i+1}</span><span>{focus}</span></div>)}</div></div>
+          <div data-story="aside" className="story-aside border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">02 / EDUCATION</span>{profile.education.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
+          <div data-story="aside" className="story-aside border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">03 / EXPERIENCE</span>{profile.experience.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
+          <div data-story="aside" className="story-aside"><Magnetic className="w-full" strength={0.045}><button onClick={onCertificatesOpen} className="group flex w-full items-center justify-between border border-ink px-5 py-4 text-left font-mono text-[11px] transition-colors hover:bg-ink hover:text-paper"><span>VIEW COURSES & CERTIFICATES</span><ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1"/></button></Magnetic></div>
         </div>
       </div>
     </section>
@@ -329,10 +329,10 @@ function Work() {
   const onKey = e => { if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1) } if (e.key === 'ArrowRight') { e.preventDefault(); move(1) } }
   return (
     <section id="work" className="page-gutter work-section relative overflow-hidden py-12 md:py-20">
-      <SectionLabel index="02" title="SELECTED PROJECTS" aside={`DEVELOPMENT ARCHIVE [ ${String(projects.length).padStart(2,'0')} ]`}/>
-      <div className="japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div>
-      <div className="mt-10 flex items-end justify-between gap-4"><h2 className="editorial-heading text-[clamp(70px,11vw,160px)]">SELECTED<br/><em className="text-signal">WORK.</em></h2><p className="mb-3 hidden max-w-44 font-mono text-[11px] leading-relaxed md:block">AN INTERACTIVE COLLECTION OF THINGS I'VE BUILT & EXPLORED.</p></div>
-      <div className="carousel-stage relative mx-auto mt-8 h-[310px] max-w-6xl touch-pan-y outline-offset-4 sm:h-[420px]" role="region" aria-roledescription="carousel" aria-label="Selected development projects" tabIndex={0} onKeyDown={onKey} onPointerDown={e => { touchStart.current = e.clientX }} onPointerUp={e => { if (touchStart.current !== null) { const dx = e.clientX - touchStart.current; if (Math.abs(dx) > 45) move(dx < 0 ? 1 : -1) } touchStart.current = null }} onPointerCancel={() => { touchStart.current = null }}>
+      <div data-story="rule" className="story-rule"><SectionLabel index="02" title="SELECTED PROJECTS" aside={`DEVELOPMENT ARCHIVE [ ${String(projects.length).padStart(2,'0')} ]`}/></div>
+      <div data-story="divider" className="story-divider japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div>
+      <div className="mt-10 flex items-end justify-between gap-4"><h2 data-story="headline" className="story-headline editorial-heading text-[clamp(70px,11vw,160px)]"><span className="story-line"><span>SELECTED</span></span><span className="story-line"><span><em className="text-signal">WORK.</em></span></span></h2><p data-story="fade" className="story-enter mb-3 hidden max-w-44 font-mono text-[11px] leading-relaxed md:block">AN INTERACTIVE COLLECTION OF THINGS I'VE BUILT & EXPLORED.</p></div>
+      <div data-story="carousel" className="carousel-stage story-carousel relative mx-auto mt-8 h-[310px] max-w-6xl touch-pan-y outline-offset-4 sm:h-[420px]" role="region" aria-roledescription="carousel" aria-label="Selected development projects" tabIndex={0} onKeyDown={onKey} onPointerDown={e => { touchStart.current = e.clientX }} onPointerUp={e => { if (touchStart.current !== null) { const dx = e.clientX - touchStart.current; if (Math.abs(dx) > 45) move(dx < 0 ? 1 : -1) } touchStart.current = null }} onPointerCancel={() => { touchStart.current = null }}>
         {projects.map((project, i) => {
           let offset = i - active
           if (offset > projects.length / 2) offset -= projects.length
@@ -345,12 +345,12 @@ function Work() {
           </button>
         })}
       </div>
-      <div className="mx-auto mt-5 flex max-w-3xl items-center justify-between gap-3">
+      <div data-story="fade" className="story-enter mx-auto mt-5 flex max-w-3xl items-center justify-between gap-3">
         <Magnetic><button className="circle-link shrink-0" onClick={() => move(-1)} aria-label="Previous project"><ArrowLeft strokeWidth={1.4}/></button></Magnetic>
         <div className="project-caption min-w-0 text-center" aria-live="polite" aria-atomic="true"><div className="font-mono text-[10px] text-signal">{live.id} / {String(projects.length).padStart(2,'0')}</div><h3 className="mt-2 truncate text-xl font-extrabold tracking-[-.05em] sm:text-3xl">{live.title}</h3><p className="mt-2 max-w-md text-xs text-ink/70 sm:text-sm">{live.description}</p><button className="mt-3 inline-flex items-center gap-1 border-b border-ink font-mono text-[10px] hover:text-signal" onClick={() => openProject(live, document.querySelector('.project-card[aria-current="true"]'))}>EXPLORE PROJECT <ArrowUpRight size={13}/></button></div>
         <Magnetic><button className="circle-link shrink-0" onClick={() => move(1)} aria-label="Next project"><ArrowRight strokeWidth={1.4}/></button></Magnetic>
       </div>
-      <div className="mt-12 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>← ARROWS / SWIPE TO ROTATE →</span><span className="text-right">GITHUB REPOSITORIES / CURATED PREVIEWS</span></div>
+      <div data-story="fade" className="story-enter mt-12 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>← ARROWS / SWIPE TO ROTATE →</span><span className="text-right">GITHUB REPOSITORIES / CURATED PREVIEWS</span></div>
       <ProjectModal selection={selected} onClose={closeProject}/>
       {toast && <div role="status" aria-live="polite" className="archive-toast fixed bottom-6 left-1/2 z-[130] flex w-[min(90vw,420px)] -translate-x-1/2 items-center justify-between gap-5 border border-ink bg-[#f1eee5] px-5 py-4 shadow-[9px_9px_0_#19191922]"><div><div className="font-mono text-[9px] tracking-widest text-ink/55">ARCHIVE / 004</div><p className="mt-1 font-medium">great things come to those who wait.</p></div><button onClick={() => setToast(false)} aria-label="Dismiss notification" className="shrink-0 rounded-full p-2 hover:bg-ink/10"><X size={17}/></button></div>}
     </section>
@@ -358,7 +358,30 @@ function Work() {
 }
 
 function Toolkit() {
-  return <section id="tools" className="page-gutter bg-stonewash py-12 md:py-20"><SectionLabel index="03" title="SKILLS AND WORKFLOW" aside="THE TOOLKIT"/><div className="japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div><div className="mt-14 grid gap-10 md:grid-cols-2"><h2 className="editorial-heading text-[clamp(48px,7vw,110px)]">TOOLS OF<br/><span className="text-signal">THE TRADE.</span></h2><div>{skills.map(skill => <div key={skill.number} className="skill-row group grid grid-cols-[95px_1fr_20px] items-center gap-2 border-b border-ink py-5 first:border-t sm:grid-cols-[145px_1fr_20px]"><span className="font-mono text-[10px]">{skill.number} / {skill.category}</span><strong className="text-sm sm:text-base">{skill.items}</strong><ArrowUpRight size={16}/></div>)}</div></div></section>
+  return (
+    <section id="tools" className="page-gutter toolkit-section relative overflow-hidden bg-stonewash py-12 md:py-20">
+      <div data-story="rule" className="story-rule"><SectionLabel index="03" title="SKILLS AND WORKFLOW" aside="THE TOOLKIT"/></div>
+      <div data-story="divider" className="story-divider japandi-divider mt-7" aria-hidden="true"><span className="japandi-mark">◯</span></div>
+      <div className="mt-14 grid gap-10 md:grid-cols-2">
+        <div>
+          <h2 data-story="headline" className="story-headline editorial-heading text-[clamp(48px,7vw,110px)]">
+            <span className="story-line"><span>TOOLS OF</span></span>
+            <span className="story-line"><span className="text-signal">THE TRADE.</span></span>
+          </h2>
+          <div data-story="fade" className="story-enter mt-7 flex items-center gap-3 font-mono text-[10px] tracking-widest text-ink/60">
+            <span className="h-px w-12 bg-signal"/> CRAFT / PRACTICE / ITERATION
+          </div>
+        </div>
+        <div className="skill-list">{skills.map((skill,i) => (
+          <div key={skill.number} data-story="skill" style={{'--skill-index':i}} className="story-skill skill-row group grid grid-cols-[95px_1fr_20px] items-center gap-2 border-b border-ink py-5 first:border-t sm:grid-cols-[145px_1fr_20px]">
+            <span className="font-mono text-[10px]">{skill.number} / {skill.category}</span>
+            <strong className="text-sm sm:text-base">{skill.items}</strong>
+            <ArrowUpRight size={16}/>
+          </div>
+        ))}</div>
+      </div>
+    </section>
+  )
 }
 
 function Contact() {
@@ -418,51 +441,28 @@ export default function App() {
     return () => {cancelAnimationFrame(raf);window.removeEventListener('scroll',update);window.removeEventListener('resize',update)}
   },[])
 
-  // Replay the section reveals in both directions. Each part moves upward when
-  // reached while scrolling down and downward when reached while scrolling up.
+  // One-time editorial reveals. Observe actual pieces, never the section or
+  // entire carousel container as a transformed parent of fixed dialogs.
   useEffect(() => {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (reducedMotion.matches || !('IntersectionObserver' in window)) return undefined
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (motion.matches || !('IntersectionObserver' in window)) return undefined
 
-    const selectors = [
-      '#about .section-label', '#about .grid',
-      '#work .section-label', '#work > .mt-10',
-      '#work .carousel-stage', '#work .controls',
-      '#tools .section-label', '#tools .grid',
-      '#contact .section-label', '#contact .editorial-heading',
-    ]
-    selectors.push('#contact > p')
-    const elements = [...document.querySelectorAll(selectors.join(','))]
-    let lastY = window.scrollY
-    let direction = 1
-    const onScroll = () => {
-      const nextY = window.scrollY
-      if (Math.abs(nextY - lastY) > 2) direction = nextY > lastY ? 1 : -1
-      lastY = nextY
-    }
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(({ target, isIntersecting }) => {
-        if (isIntersecting) {
-          target.style.setProperty('--reveal-y', direction > 0 ? '74px' : '-74px')
-          target.classList.add('is-visible')
-        } else {
-          target.classList.remove('is-visible')
-        }
-      })
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 })
-
-    elements.forEach(el => {
-      el.classList.add('scroll-motion')
-      observer.observe(el)
+    const nodes = [...document.querySelectorAll('#about [data-story],#work [data-story],#tools [data-story]')]
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      }
+    }, {rootMargin:'0px 0px -7% 0px',threshold:0.08})
+    // Prepare all nodes before any reveal. Without JS they remain readable.
+    nodes.forEach(node => {
+      node.classList.add('story-ready')
+      observer.observe(node)
     })
-    window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       observer.disconnect()
-      window.removeEventListener('scroll', onScroll)
-      elements.forEach(el => {
-        el.classList.remove('scroll-motion', 'is-visible')
-        el.style.removeProperty('--reveal-y')
-      })
+      nodes.forEach(node => node.classList.remove('story-ready','is-visible'))
     }
   }, [])
 
