@@ -4,6 +4,7 @@ import { projects } from './data/projects'
 import { profile } from './data/profile'
 import { DragHandle, FilmWindow, CertificatesWindow } from './components/ArchiveWindows'
 import ArcadeHub from './components/ArcadeHub'
+import Magnetic from './components/Magnetic'
 
 const skills = [
   { number: '01', category: 'FRONTEND', items: 'React, JavaScript, HTML, CSS' },
@@ -64,7 +65,7 @@ function PixelPlane({onClick,count}) {
 
 function Hero({onPlaneClick,planeCount}) {
   return (
-    <section id="home" className="page-gutter hero relative isolate flex min-h-[min(820px,calc(100svh-70px))] flex-col justify-between overflow-hidden py-8">
+    <section id="home" className="page-gutter hero relative isolate flex min-h-[min(820px,calc(100svh-70px))] flex-col justify-between overflow-hidden py-8" onPointerMove={event => {if(event.pointerType!=='mouse'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return; const rect=event.currentTarget.getBoundingClientRect();event.currentTarget.style.setProperty('--hero-x',((event.clientX-rect.left)/rect.width*100).toFixed(1)+'%');event.currentTarget.style.setProperty('--hero-y',((event.clientY-rect.top)/rect.height*100).toFixed(1)+'%')}}>
       <div className="hero-architectural pointer-events-none absolute inset-0 -z-10" aria-hidden="true"><span className="hero-architectural-ring"/><span className="hero-architectural-cross">+</span><span className="hero-architectural-index">DESIGN ARCHIVE / 001</span></div>
       <div className="flex justify-between gap-4 font-mono text-[9px] tracking-wider sm:text-[11px]"><span>[ PORTFOLIO — VOL. 001 ]</span><span className="text-right">DESIGN × TECHNOLOGY × STORYTELLING</span></div>
       <div className="hero-headline relative my-16" aria-label="Crafting digital things that matter">
@@ -76,7 +77,7 @@ function Hero({onPlaneClick,planeCount}) {
       <div>
         <div className="flex items-end justify-between gap-5">
           <div className="max-w-sm"><span className="hero-kicker font-mono text-[11px] text-signal"><span className="status-dot"/> HELLO, I'M A CREATIVE DEVELOPER.</span><p className="mt-3 text-sm leading-relaxed sm:text-lg">Building considered digital experiences and exploring stories through a different lens.</p></div>
-          <a href="#work" aria-label="Explore selected work" className="circle-link shrink-0"><ArrowDown strokeWidth={1.5} size={30}/></a>
+          <Magnetic><a href="#work" aria-label="Explore selected work" className="circle-link shrink-0"><ArrowDown strokeWidth={1.5} size={30}/></a></Magnetic>
         </div>
         <div className="mt-10 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>CURATED DIGITAL ARCHIVE</span><span className="flex items-center gap-3">SCROLL TO EXPLORE <span className="scroll-cue">↓</span><PixelPlane onClick={onPlaneClick} count={planeCount}/></span></div>
       </div>
@@ -95,7 +96,7 @@ function About({ onCertificatesOpen }) {
       <div className="grid gap-8 pt-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] md:gap-14">
         <div>
           <figure className="profile-portrait mb-9 w-full max-w-[360px]">
-            <div className="profile-image-surface relative aspect-square overflow-hidden border border-ink/70 bg-[#dcded2]">
+            <div className="profile-image-surface portrait-parallax relative aspect-square overflow-hidden border border-ink/70 bg-[#dcded2]" onPointerMove={event => { if(event.pointerType!=='mouse'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return; const rect=event.currentTarget.getBoundingClientRect();event.currentTarget.style.setProperty('--portrait-x',((event.clientX-rect.left)/rect.width-.5)*13+'px');event.currentTarget.style.setProperty('--portrait-y',((event.clientY-rect.top)/rect.height-.5)*13+'px') }} onPointerLeave={event => { event.currentTarget.style.setProperty('--portrait-x','0px');event.currentTarget.style.setProperty('--portrait-y','0px') }}>
               {profile.photoUrl ? <img src={profile.photoUrl} alt="Profile portrait" className="h-full w-full object-cover" loading="lazy"/> : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-[#7c8876]">
                   <svg viewBox="0 0 200 200" className="w-1/2" role="img" aria-label="Abstract portrait placeholder"><circle cx="100" cy="68" r="35" fill="currentColor"/><path d="M34 180c0-46 26-70 66-70s66 24 66 70" fill="currentColor"/><circle cx="100" cy="100" r="91" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="3 7"/></svg>
@@ -121,7 +122,7 @@ function About({ onCertificatesOpen }) {
           <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">01 / WHAT I DO</span><div className="mt-5 grid gap-3 sm:grid-cols-2">{profile.focus.map((focus,i) => <div className="flex gap-3 border-b border-ink/20 pb-3 text-sm" key={focus}><span className="font-mono text-[10px] text-ink/50">0{i+1}</span><span>{focus}</span></div>)}</div></div>
           <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">02 / EDUCATION</span>{profile.education.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
           <div className="border-t border-ink pt-4"><span className="font-mono text-[10px] tracking-widest text-ink/60">03 / EXPERIENCE</span>{profile.experience.map((entry,i) => <div key={i} className="mt-5 flex justify-between gap-5"><div><h4 className="font-semibold">{entry.title}</h4><p className="mt-1 text-sm text-ink/65">{entry.detail}</p></div>{entry.placeholder && <span className="shrink-0 self-start font-mono text-[9px] text-ink/45">TO UPDATE</span>}</div>)}</div>
-          <button onClick={onCertificatesOpen} className="group flex w-full items-center justify-between border border-ink px-5 py-4 text-left font-mono text-[11px] transition-colors hover:bg-ink hover:text-paper"><span>VIEW COURSES & CERTIFICATES</span><ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1"/></button>
+          <Magnetic className="w-full" strength={0.045}><button onClick={onCertificatesOpen} className="group flex w-full items-center justify-between border border-ink px-5 py-4 text-left font-mono text-[11px] transition-colors hover:bg-ink hover:text-paper"><span>VIEW COURSES & CERTIFICATES</span><ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1"/></button></Magnetic>
         </div>
       </div>
     </section>
@@ -242,14 +243,14 @@ function ProjectModal({ selection, onClose }) {
           </div>
         </div>
       ) : (
-        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" className="expanded-project relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10">
-          <div className="flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={onClose} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
-          <h2 id="project-modal-title" className="editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
-          <InterfacePreview project={project}/>
+        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" className="expanded-project cinematic-case relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10">
+          <div className="case-sequence case-sequence-1 flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={onClose} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
+          <div className="case-sequence case-sequence-2 mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
+          <h2 id="project-modal-title" className="case-sequence case-sequence-3 editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
+          <div className="case-visual-wrap case-sequence case-sequence-4 relative overflow-hidden"><span className="case-visual-index pointer-events-none absolute right-3 top-3 z-10 border border-ink/20 bg-paper/90 px-2 py-1 font-mono text-[9px]">FIG. {project.id} / PROJECT STUDY</span><InterfacePreview project={project}/></div>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-wide text-ink/60">Illustrative UI mockup — not an actual project screenshot</p>
-          <div className="mt-7 grid gap-6 md:grid-cols-[1.3fr_1fr]"><div><p className="font-mono text-[10px] text-signal">THE CONCEPT</p><p className="mt-2 max-w-xl text-sm leading-relaxed sm:text-base">{project.summary}</p></div><div><p className="font-mono text-[10px] text-signal">TECHNOLOGIES</p><div className="mt-3 flex flex-wrap gap-2">{project.stack.map(t => <span className="border border-ink px-3 py-2 font-mono text-[10px]" key={t}>{t}</span>)}</div></div></div>
-          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3">{project.link && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer"><Github size={15}/> VIEW GITHUB REPOSITORY <ArrowUpRight size={15}/></a>}{project.live && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.live} target="_blank" rel="noopener noreferrer">LIVE APPLICATION <ArrowUpRight size={15}/></a>}</div>
+          <div className="case-sequence case-sequence-5 mt-7 grid gap-6 md:grid-cols-[1.3fr_1fr]"><div><p className="font-mono text-[10px] text-signal">THE CONCEPT</p><p className="mt-2 max-w-xl text-sm leading-relaxed sm:text-base">{project.summary}</p></div><div><p className="font-mono text-[10px] text-signal">TECHNOLOGIES</p><div className="mt-3 flex flex-wrap gap-2">{project.stack.map(t => <span className="border border-ink px-3 py-2 font-mono text-[10px]" key={t}>{t}</span>)}</div></div></div>
+          <div className="case-sequence case-sequence-6 mt-7 flex flex-wrap gap-x-6 gap-y-3">{project.link && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer"><Github size={15}/> VIEW GITHUB REPOSITORY <ArrowUpRight size={15}/></a>}{project.live && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.live} target="_blank" rel="noopener noreferrer">LIVE APPLICATION <ArrowUpRight size={15}/></a>}</div>
         </section>
       )}
     </div>
@@ -299,9 +300,9 @@ function Work() {
         })}
       </div>
       <div className="mx-auto mt-5 flex max-w-3xl items-center justify-between gap-3">
-        <button className="circle-link shrink-0" onClick={() => move(-1)} aria-label="Previous project"><ArrowLeft strokeWidth={1.4}/></button>
+        <Magnetic><button className="circle-link shrink-0" onClick={() => move(-1)} aria-label="Previous project"><ArrowLeft strokeWidth={1.4}/></button></Magnetic>
         <div className="project-caption min-w-0 text-center" aria-live="polite" aria-atomic="true"><div className="font-mono text-[10px] text-signal">{live.id} / {String(projects.length).padStart(2,'0')}</div><h3 className="mt-2 truncate text-xl font-extrabold tracking-[-.05em] sm:text-3xl">{live.title}</h3><p className="mt-2 max-w-md text-xs text-ink/70 sm:text-sm">{live.description}</p><button className="mt-3 inline-flex items-center gap-1 border-b border-ink font-mono text-[10px] hover:text-signal" onClick={() => openProject(live, document.querySelector('.project-card[aria-current="true"]'))}>EXPLORE PROJECT <ArrowUpRight size={13}/></button></div>
-        <button className="circle-link shrink-0" onClick={() => move(1)} aria-label="Next project"><ArrowRight strokeWidth={1.4}/></button>
+        <Magnetic><button className="circle-link shrink-0" onClick={() => move(1)} aria-label="Next project"><ArrowRight strokeWidth={1.4}/></button></Magnetic>
       </div>
       <div className="mt-12 flex justify-between gap-4 border-t border-ink pt-3 font-mono text-[9px] sm:text-[11px]"><span>← ARROWS / SWIPE TO ROTATE →</span><span className="text-right">GITHUB REPOSITORIES / CURATED PREVIEWS</span></div>
       <ProjectModal selection={selected} onClose={closeProject}/>
