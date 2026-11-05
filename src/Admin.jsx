@@ -9,6 +9,8 @@ async function request(action, options) {
   return data
 }
 const blankCertificate = () => ({label:'COURSE',title:'',issuer:'',date:'',image:'',url:'',placeholder:false})
+const blankFilm = () => ({title:'',year:String(new Date().getFullYear()),format:'SHORT FILM',role:'',description:'',poster:'',link:''})
+const filmFormats = ['SHORT FILM','DOCUMENTARY','MUSIC VIDEO','MOTION STUDY','EXPERIMENTAL','VIDEO ESSAY','OTHER']
 const certificateCategories = ['COURSE','SEMINAR','CERTIFICATE']
 const projectCategories = ['FULL-STACK / MOBILE','FULL-STACK / WEB','FRONTEND / WEB','BACKEND / API','AUDIO / CREATIVE CODING','PERSONAL FINANCE / WEB','MOBILE APPLICATION','UI / UX DESIGN','AUTOMATION / TOOLS','DATA / ANALYTICS','GAME DEVELOPMENT','OTHER']
 const yearOptions = Array.from({length:16},(_,i)=>String(new Date().getFullYear()+1-i))
@@ -83,6 +85,7 @@ export default function Admin() {
     ...data,[key]:data[key].map((item,i)=>i===index?{...item,[field]:value}:item)
   }))
   const patchProject = (index,key,value) => update('projects',list=>list.map((item,i)=>i===index?{...item,[key]:value}:item))
+  const patchFilm = (index,key,value) => update('profile',data=>({...data,films:(data.films||[]).map((item,i)=>i===index?{...item,[key]:value}:item)}))
   async function save(name) {
     setBusy('saving');setMessage('');setError('')
     try {
@@ -132,6 +135,23 @@ export default function Admin() {
     }catch(err){setError(err.message);notify('error',err.message)}
     finally{setBusy('')}
   }
+  async function uploadFilmImage(index,file) {
+    if(!file)return
+    if(file.size>1900000){notify('error','Compress film stills or posters to under 1.9 MB.');return}
+    setBusy('upload-film');setError('')
+    try {
+      const base64=await new Promise((resolve,reject)=>{
+        const reader=new FileReader()
+        reader.onload=()=>resolve(String(reader.result).split(',')[1])
+        reader.onerror=()=>reject(new Error('Could not read image'))
+        reader.readAsDataURL(file)
+      })
+      const result=await request('upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:file.name,content:base64,kind:'film'})})
+      patchFilm(index,'poster',result.url)
+      notify('success','Film frame uploaded. Save Film Archive to publish the new image.')
+    }catch(err){setError(err.message);notify('error',err.message)}
+    finally{setBusy('')}
+  }
   async function logout(){
     try { await request('logout',{method:'POST'}) } catch {}
     window.location.assign('/')
@@ -151,7 +171,7 @@ export default function Admin() {
     <div className="mx-auto max-w-6xl pt-12"><p className="font-mono text-[10px] tracking-widest text-[#7b7a6d]">OWNER-ONLY / GIT-BACKED CMS</p>
       <h1 className="mt-3 text-[clamp(43px,8vw,90px)] font-black leading-none tracking-[-.09em]">CONTENT STUDIO<span className="text-[#f34d31]">.</span></h1>
       <p className="mt-4 max-w-2xl text-sm leading-7">Edit locally in this panel, then save to create a GitHub commit. Images upload to your repository; changes become public after Vercel builds the commit.</p>
-      <nav aria-label="Editor sections" className="mt-10 flex flex-wrap gap-2">{[['profile','PROFILE'],['certificates','CERTIFICATES'],['projects','PROJECTS']].map(([id,label])=><button key={id} onClick={()=>{setActive(id);setError('');setMessage('')}} className={button+(active===id?' bg-[#191919] text-[#f3f1ea]':'')}>{label}</button>)}</nav>
+      <nav aria-label="Editor sections" className="mt-10 flex flex-wrap gap-2">{[['profile','PROFILE'],['certificates','CERTIFICATES'],['projects','PROJECTS'],['films','FILM ARCHIVE']].map(([id,label])=><button key={id} onClick={()=>{setActive(id);setError('');setMessage('')}} className={button+(active===id?' bg-[#191919] text-[#f3f1ea]':'')}>{label}</button>)}</nav>
       {error&&<div role="alert" className="mt-6 border-l-4 border-[#d1422e] bg-[#fae4de] p-4 text-sm">{error}</div>}
       {message&&<div role="status" className="mt-6 border-l-4 border-[#728367] bg-[#e0e7d8] p-4 text-sm">{message}</div>}
       {(!profile||!projects)&&<button className={button+' mt-8'} onClick={load}>RETRY LOADING CONTENT</button>}
@@ -176,6 +196,34 @@ export default function Admin() {
             <label className="mt-5 inline-flex cursor-pointer items-center gap-2 border border-[#191919] px-4 py-3 font-mono text-[11px]"><ImagePlus size={16}/> {busy==='upload'?'UPLOADING…':'UPLOAD IMAGE'}<input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={!!busy} onChange={e=>{upload(i,e.target.files?.[0]);e.target.value=''}}/></label>
           </article>)}
           <button className={button} onClick={()=>patchProfile('learning',[...profile.learning,blankCertificate()])}><Plus size={16}/> ADD CERTIFICATE</button>
+        </>}
+        {active==='films'&&<>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div><p className="font-mono text-[10px] tracking-widest text-[#a84337]">THE OTHER PRACTICE / CINEMA DIVISION</p><h2 className="mt-2 text-3xl font-black tracking-[-.055em]">FILM ARCHIVE<span className="text-[#cc5849]">.</span></h2><p className="mt-3 max-w-2xl text-sm leading-7 text-[#6e6c65]">Only add films you actually want to publish. If this list is empty, the public archive shows an intentional coming-soon screen.</p></div>
+            <button className={button} onClick={()=>patchProfile('films',[...(profile.films||[]),blankFilm()])}><Plus size={16}/> ADD FILM</button>
+          </div>
+          {!(profile.films||[]).length&&<div className="border border-dashed border-[#aaa596] bg-[#e9e6df] px-5 py-10 text-center"><p className="font-mono text-[11px] tracking-widest">REEL 00 / NO RELEASED FILMS</p><p className="mt-2 text-sm text-[#77766c]">The screening-room design is live, without invented films or production credits.</p></div>}
+          {(profile.films||[]).map((film,i)=><article key={i} className="border border-[#aaa596] bg-[#f8f6f0] p-5 sm:p-7">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><span className="font-mono text-[11px] tracking-wider">FRAME {String(i+1).padStart(3,'0')}</span><div className="flex gap-2">
+              <button disabled={i===0} className="border border-[#aaa596] p-2 disabled:opacity-25" aria-label="Move film earlier" onClick={()=>patchProfile('films',(profile.films||[]).map((v,j)=>j===i-1?profile.films[i]:j===i?profile.films[i-1]:v))}><MoveUp size={15}/></button>
+              <button disabled={i===(profile.films||[]).length-1} className="border border-[#aaa596] p-2 disabled:opacity-25" aria-label="Move film later" onClick={()=>patchProfile('films',(profile.films||[]).map((v,j)=>j===i+1?profile.films[i]:j===i?profile.films[i+1]:v))}><MoveDown size={15}/></button>
+              <button className="flex items-center gap-2 border border-[#bfa7a0] px-3 py-2 font-mono text-[10px] text-[#a33b2c]" onClick={()=>{if(window.confirm('Remove this film from the published archive?'))patchProfile('films',(profile.films||[]).filter((_,j)=>j!==i))}}><Trash2 size={14}/> REMOVE</button>
+            </div></div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="FILM TITLE" value={film.title} onChange={v=>patchFilm(i,'title',v)} placeholder="Your film title"/>
+              <Field label="YEAR" value={film.year} onChange={v=>patchFilm(i,'year',v)}/>
+              <SelectField label="FORMAT" value={film.format||'SHORT FILM'} options={filmFormats} onChange={v=>patchFilm(i,'format',v)}/>
+              <Field label="YOUR ROLE / CREDIT" value={film.role} onChange={v=>patchFilm(i,'role',v)} placeholder="Only your actual production role"/>
+              <Field label="VIDEO / FILM LINK" value={film.link} onChange={v=>patchFilm(i,'link',v)} placeholder="https://..."/>
+              <Field label="POSTER IMAGE PATH" value={film.poster} onChange={v=>patchFilm(i,'poster',v)} placeholder="/films/example.webp"/>
+            </div>
+            <div className="mt-4"><Field label="DESCRIPTION / PROJECT NOTES" value={film.description} onChange={v=>patchFilm(i,'description',v)} multiline/></div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div className="flex min-h-[170px] items-center justify-center overflow-hidden border border-[#bcb7ae] bg-[#171719]">{film.poster?<img src={film.poster} alt={film.title||'Film frame'} className="max-h-[280px] w-full object-contain"/>:<span className="font-mono text-[10px] tracking-widest text-white/55">NO POSTER UPLOADED</span>}</div>
+              <label className="inline-flex cursor-pointer items-center justify-center gap-2 border border-[#191919] px-4 py-3 font-mono text-[11px] hover:bg-[#191919] hover:text-white"><ImagePlus size={16}/>{busy==='upload-film'?'UPLOADING…':'UPLOAD STILL / POSTER'}<input type="file" className="sr-only" accept="image/png,image/jpeg,image/webp" disabled={!!busy} onChange={e=>{uploadFilmImage(i,e.target.files?.[0]);e.target.value=''}}/></label>
+            </div>
+          </article>)}
+          <p className="text-xs leading-6 text-[#77766c]">Film images must be under 1.9 MB and will be stored publicly in GitHub. After uploading or editing a film, click Save Film Archive below.</p>
         </>}
         {active==='projects'&&<>
           <h2 className="text-2xl font-black tracking-tight">SELECTED PROJECTS</h2>
@@ -236,7 +284,7 @@ export default function Admin() {
         <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-[#191919] bg-[#f3f1ea]/95 py-5 backdrop-blur-sm">
           <p className="font-mono text-[10px] text-[#77766c]">SAVING COMMITS TO MAIN BRANCH</p>
           <button className={button+' bg-[#191919] text-[#f3f1ea]'} onClick={()=>save(active==='projects'?'projects':'profile')} disabled={!!busy}>
-            {busy?<Loader2 size={16} className="animate-spin"/>:<Save size={16}/>} SAVE {active==='profile'?'PROFILE':active==='certificates'?'CERTIFICATES':'PROJECTS'}
+            {busy?<Loader2 size={16} className="animate-spin"/>:<Save size={16}/>} SAVE {active==='profile'?'PROFILE':active==='certificates'?'CERTIFICATES':active==='films'?'FILM ARCHIVE':'PROJECTS'}
           </button>
         </div>
       </section>}
