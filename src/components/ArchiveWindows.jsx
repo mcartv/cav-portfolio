@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Clapperboard, Grip, X } from 'lucide-react'
 import { profile } from '../data/profile'
 
@@ -111,6 +111,21 @@ function formatCertificateDate(value) {
   return new Intl.DateTimeFormat('en-US', {month:'short',day:'2-digit',year:'numeric'}).format(date)
 }
 
+function CertificateVisual({ entry }) {
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [entry.image])
+  if (!entry.image || failed) return (
+    <div className="certificate-placeholder mt-5 flex min-h-[170px] flex-col items-center justify-center gap-3 border border-[#aaa596] bg-[#eae7dd] px-5 py-10 text-center">
+      <span aria-hidden="true" className="font-serif text-5xl italic text-[#828d7a]">✳</span>
+      <span className="font-mono text-[10px] tracking-widest text-[#5b6257]">DOCUMENT PREVIEW UNAVAILABLE</span>
+      <span className="max-w-[260px] text-xs leading-5 text-[#77766c]">The certificate image needs to be uploaded or replaced in Content Studio.</span>
+    </div>
+  )
+  return <a href={entry.url || entry.image} target="_blank" rel="noopener noreferrer" aria-label={'View certificate: ' + entry.title} className="certificate-image-link mt-5 block overflow-hidden border border-[#aaa596] bg-white">
+    <img src={entry.image} alt={'Certificate: ' + entry.title} onError={() => setFailed(true)} loading="lazy" className="mx-auto block h-auto max-h-[460px] w-full object-contain transition-transform duration-500 hover:scale-[1.025]"/>
+  </a>
+}
+
 export function CertificatesWindow({ open, onClose }) {
   const panelRef = usePanelFocus(open, onClose)
   return (
@@ -122,31 +137,14 @@ export function CertificatesWindow({ open, onClose }) {
         <div className="certificate-scroll flex-1 overflow-y-auto px-5 py-8 sm:px-10 sm:py-12">
           <div className="font-mono text-[10px] tracking-widest text-[#716f63]">A COLLECTION IN PROGRESS</div>
           <h2 id="cert-window-title" className="editorial-heading mt-3 text-[clamp(56px,8vw,96px)]">LIFELONG<br /><span className="font-serif font-normal italic text-[#6e7967]">learning.</span></h2>
-          <p className="mt-5 max-w-md text-sm leading-7">Courses, seminars, workshops and certificates collected along the way. The records below are editable placeholders until verified credentials are added.</p>
+          <p className="mt-5 max-w-md text-sm leading-7">A growing archive of courses, seminars, and certifications. Open any available image to inspect the full document.</p>
           <div className="japandi-divider my-8" aria-hidden="true"><span className="japandi-mark">◯</span></div>
           <div className="space-y-4">
             {profile.learning.map((entry, i) => (
               <article className="certificate-entry border border-[#aaa596] bg-[#f8f6f0] p-5 sm:p-7" key={i}>
                 <div className="flex items-start justify-between gap-3 font-mono text-[10px] text-[#77766c]"><span>{String(i+1).padStart(2,'0')} / {entry.label}</span><span>{formatCertificateDate(entry.date)}</span></div>
-                {entry.image && <a href={entry.url || entry.image} target="_blank" rel="noopener noreferrer" aria-label={'View certificate: ' + entry.title} className="mt-5 block overflow-hidden border border-[#aaa596] bg-white"><img src={entry.image} alt={'Certificate: ' + entry.title} loading="lazy" className="h-auto max-h-[460px] w-full object-contain transition-transform duration-500 hover:scale-[1.025]"/></a>}
+                <CertificateVisual entry={entry}/>
                 <h3 className="mt-6 text-xl font-bold tracking-tight sm:text-2xl">{entry.title}</h3>
-
-                {entry.image && (
-                  <a
-                    href={entry.url || entry.image}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`View ${entry.title} certificate`}
-                    className="mt-5 block overflow-hidden border border-[#aaa596] bg-white"
-                  >
-                    <img
-                      src={entry.image}
-                      alt={`Certificate: ${entry.title}`}
-                      className="h-auto w-full object-contain transition-transform duration-500 hover:scale-[1.02]"
-                      loading="lazy"
-                    />
-                  </a>
-                )}
                 <p className="mt-2 text-sm text-[#66665f]">{entry.issuer}</p>
                 {entry.url ? <a className="mt-6 inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-[10px]" href={entry.url} target="_blank" rel="noopener noreferrer">VIEW CERTIFICATE <ArrowUpRight size={14} /></a> : <div className="mt-6 font-mono text-[10px] text-[#8c877c]">DOCUMENT TO BE ADDED ↗</div>}
               </article>
