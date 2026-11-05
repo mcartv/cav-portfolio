@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowUpRight, CheckCircle2, Github, ImagePlus, Loader2, Plus, Save, Trash2, X, AlertCircle } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, CheckCircle2, Github, ImagePlus, Loader2, Plus, Save, Trash2, X, AlertCircle, MoveUp, MoveDown } from 'lucide-react'
 
 const endpoint = action => '/api/admin?action=' + action
 async function request(action, options) {
@@ -13,7 +13,7 @@ const certificateCategories = ['COURSE','SEMINAR','CERTIFICATE']
 const projectCategories = ['FULL-STACK / MOBILE','FULL-STACK / WEB','FRONTEND / WEB','BACKEND / API','AUDIO / CREATIVE CODING','PERSONAL FINANCE / WEB','MOBILE APPLICATION','UI / UX DESIGN','AUTOMATION / TOOLS','DATA / ANALYTICS','GAME DEVELOPMENT','OTHER']
 const yearOptions = Array.from({length:16},(_,i)=>String(new Date().getFullYear()+1-i))
 const projectNumber = index => String(index + 1).padStart(2,'0')
-const newProject = () => ({id:'',slug:'new-project-'+Date.now().toString(36),title:'Untitled project',type:'FULL-STACK / WEB',year:String(new Date().getFullYear()),color:'#CAD8C4',light:'#EEF4EA',description:'',summary:'',stack:[],mark:'NP',link:'',live:''})
+const newProject = () => ({id:'',slug:'new-project-'+Date.now().toString(36),title:'Untitled project',type:'FULL-STACK / WEB',year:String(new Date().getFullYear()),color:'#CAD8C4',light:'#EEF4EA',description:'',summary:'',stack:[],mark:'NP',link:'',live:'',challenge:'',solution:'',contribution:'',highlights:[],screenshots:[]})
 const normalizeProjects = list => {
   const real = list.filter(p=>!p.placeholder && p.slug !== 'coming-soon')
   const placeholder = list.find(p=>p.placeholder || p.slug === 'coming-soon')
@@ -113,6 +113,25 @@ export default function Admin() {
     } catch(err){setError(err.message);notify('error',err.message)}
     finally{setBusy('')}
   }
+  const patchScreenshot = (projectIndex,index,key,value) => update('projects',list=>list.map((project,i)=>i===projectIndex?{...project,screenshots:(project.screenshots||[]).map((photo,j)=>j===index?{...photo,[key]:value}:photo)}:project))
+  const changeScreenshots = (projectIndex,transform) => update('projects',list=>list.map((project,i)=>i===projectIndex?{...project,screenshots:transform(project.screenshots||[])}:project))
+  async function uploadProjectImage(index,file) {
+    if(!file)return
+    if(file.size>1900000){notify('error','Compress screenshots to less than 1.9 MB.');return}
+    setBusy('upload-project');setError('')
+    try {
+      const base64=await new Promise((resolve,reject)=>{
+        const reader=new FileReader()
+        reader.onload=()=>resolve(String(reader.result).split(',')[1])
+        reader.onerror=()=>reject(new Error('Could not read image'))
+        reader.readAsDataURL(file)
+      })
+      const result=await request('upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:file.name,content:base64,kind:'project'})})
+      changeScreenshots(index,shots=>[...shots,{src:result.url,caption:'',alt:'',label:'PROJECT INTERFACE'}])
+      notify('success','Screenshot uploaded to GitHub. Add a caption and Save Projects to publish it.')
+    }catch(err){setError(err.message);notify('error',err.message)}
+    finally{setBusy('')}
+  }
   async function logout(){
     try { await request('logout',{method:'POST'}) } catch {}
     window.location.assign('/')
@@ -176,6 +195,40 @@ export default function Admin() {
               <ColorField label="LIGHT COLOR" value={project.light} onChange={v=>patchProject(i,'light',v)}/>
             </div>
             <div className="mt-4 space-y-4"><Field label="CASE STUDY SUMMARY" multiline value={project.summary} onChange={v=>patchProject(i,'summary',v)}/><Field label="TECH STACK (COMMA SEPARATED)" value={project.stack.join(', ')} onChange={v=>patchProject(i,'stack',v.split(',').map(x=>x.trim()).filter(Boolean))}/></div>
+            <div className="mt-7 border-t border-[#aaa596] pt-5">
+              <h3 className="font-mono text-xs font-bold tracking-wider">CASE STUDY / BEHIND THE BUILD</h3>
+              <p className="mt-2 text-xs leading-6 text-[#77766c]">Describe your actual work. Blank sections stay hidden on the public site.</p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <Field label="THE CHALLENGE" multiline value={project.challenge||''} onChange={v=>patchProject(i,'challenge',v)}/>
+                <Field label="THE SOLUTION" multiline value={project.solution||''} onChange={v=>patchProject(i,'solution',v)}/>
+                <Field label="MY CONTRIBUTION" multiline value={project.contribution||''} onChange={v=>patchProject(i,'contribution',v)}/>
+                <Field label="KEY DETAILS (ONE PER LINE)" multiline value={(project.highlights||[]).join('\n')} onChange={v=>patchProject(i,'highlights',v.split('\n').map(x=>x.trim()).filter(Boolean))}/>
+              </div>
+            </div>
+            <div className="mt-7 border-t border-[#aaa596] pt-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div><h3 className="font-mono text-xs font-bold tracking-wider">PROJECT SCREENSHOTS / GALLERY</h3><p className="mt-2 text-xs text-[#77766c]">The first image serves as the gallery cover. Drag-free ordering uses the arrows below.</p></div>
+                <label className="inline-flex cursor-pointer items-center gap-2 border border-[#191919] px-3 py-2.5 font-mono text-[10px] hover:bg-[#e9e6dc]"><ImagePlus size={15}/>{busy==='upload-project'?'UPLOADING…':'UPLOAD SCREENSHOT'}<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!!busy||(project.screenshots||[]).length>=12} onChange={e=>{uploadProjectImage(i,e.target.files?.[0]);e.target.value=''}}/></label>
+              </div>
+              <p className="mt-2 text-[10px] text-[#77766c]">PNG, JPG, or WebP. Maximum 1.9 MB per image. Up to 12 images per project. Uploaded files are publicly accessible.</p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {(project.screenshots||[]).map((photo,j)=><div key={photo.src+'-'+j} className="border border-[#c0b9ac] bg-[#f3f0e8] p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2"><span className="font-mono text-[10px]">FRAME {String(j+1).padStart(2,'0')}{j===0?' / COVER':''}</span><div className="flex gap-1">
+                    <button title="Move image left" aria-label="Move image earlier" disabled={j===0} className="border border-[#aaa596] p-1.5 disabled:opacity-30" onClick={()=>changeScreenshots(i,shots=>{const next=[...shots];[next[j-1],next[j]]=[next[j],next[j-1]];return next})}><MoveUp size={14}/></button>
+                    <button title="Move image right" aria-label="Move image later" disabled={j===(project.screenshots||[]).length-1} className="border border-[#aaa596] p-1.5 disabled:opacity-30" onClick={()=>changeScreenshots(i,shots=>{const next=[...shots];[next[j+1],next[j]]=[next[j],next[j+1]];return next})}><MoveDown size={14}/></button>
+                    <button aria-label="Remove screenshot" title="Remove screenshot from gallery" className="border border-[#bfa7a0] p-1.5 text-[#a33b2c]" onClick={()=>changeScreenshots(i,shots=>shots.filter((_,k)=>k!==j))}><Trash2 size={14}/></button>
+                  </div></div>
+                  <div className="flex min-h-[120px] items-center justify-center border border-[#c0b9ac] bg-[#e9e6de]"><img src={photo.src} alt={photo.alt||photo.caption||'Screenshot'} className="max-h-[200px] w-full object-contain" loading="lazy" onError={e=>{e.currentTarget.style.opacity='.3'}}/></div>
+                  <div className="mt-3 space-y-3">
+                    <Field label="CAPTION" value={photo.caption||''} onChange={v=>patchScreenshot(i,j,'caption',v)}/>
+                    <Field label="ACCESSIBLE IMAGE DESCRIPTION" value={photo.alt||''} onChange={v=>patchScreenshot(i,j,'alt',v)}/>
+                    <Field label="FRAME LABEL" value={photo.label||''} onChange={v=>patchScreenshot(i,j,'label',v)}/>
+                  </div>
+                </div>)}
+              </div>
+              {!(project.screenshots||[]).length&&<div className="mt-4 border border-dashed border-[#b4ab9b] px-4 py-8 text-center font-mono text-[10px] text-[#77766c]">NO IMAGES YET / THE PUBLIC MODAL SHOWS ITS CONCEPTUAL PREVIEW</div>}
+              <p className="mt-3 text-[10px] text-[#77766c]">Click Save Projects after uploading or rearranging images. New image paths will load after Vercel finishes deploying the commit.</p>
+            </div>
           </article>)}
           <button className={button} onClick={()=>update('projects',list=>normalizeProjects([...list.filter(p=>!p.placeholder && p.slug!=='coming-soon'),newProject(),...list.filter(p=>p.placeholder || p.slug==='coming-soon')]))}><Plus size={16}/> ADD PROJECT</button>
           <div className="border border-dashed border-[#a8a698] bg-[#e8e5dc] p-5 sm:p-7"><div className="flex items-center justify-between gap-3"><span className="font-mono text-[10px]">CARD {projectNumber(projects.length-1)} / FIXED PLACEHOLDER</span><span className="font-mono text-[10px] text-[#626557]">LOCKED</span></div><h3 className="mt-4 text-xl font-bold">More projects to come</h3><p className="mt-2 text-sm text-[#66665e]">This is a permanent closing card that signals new projects are in progress. It stays last, is not editable, and is automatically renumbered as your portfolio grows.</p></div>
