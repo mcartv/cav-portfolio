@@ -219,7 +219,7 @@ function ProjectModal({ selection, onClose }) {
     closing.current=false
     setCloseMotion({})
     setPhase(reducedMotion.current ? 'expanded' : 'flip')
-    const animation = reducedMotion.current ? 0 : 720
+    const animation = reducedMotion.current ? 0 : 620
     const timer = window.setTimeout(() => {if(!closing.current)setPhase('expanded')}, animation)
     const focusTimer = window.setTimeout(() => {if(!closing.current)closeRef.current?.focus()}, animation + 35)
     const onKey = e => {
@@ -275,6 +275,7 @@ function ProjectModal({ selection, onClose }) {
         </div>
       ) : (
         <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" ref={modalRef} style={phase==='collapsing'?closeMotion:undefined} className={'expanded-project cinematic-case relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10 '+(phase==='collapsing'?'case-study-contract':'')}>
+          <div aria-hidden="true" className="case-scroll-fade pointer-events-none sticky top-0 z-20 -mb-12 h-12"/>
           <div className="case-sequence case-sequence-1 flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={requestClose} disabled={phase==='collapsing'} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
           <div className="case-sequence case-sequence-2 mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
           <h2 id="project-modal-title" className="case-sequence case-sequence-3 editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
