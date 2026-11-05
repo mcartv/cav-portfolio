@@ -177,7 +177,7 @@ export default function Admin() {
       {(!profile||!projects)&&<button className={button+' mt-8'} onClick={load}>RETRY LOADING CONTENT</button>}
       {profile&&projects&&<section className="mt-9 max-w-4xl space-y-7">
         {active==='profile'&&<>
-          <div className="grid gap-4 sm:grid-cols-2">{[['displayName','NAME'],['headline','HEADLINE'],['location','LOCATION'],['linkedinUrl','LINKEDIN URL'],['githubUrl','GITHUB URL'],['photoUrl','PROFILE IMAGE PATH'],['resumeUrl','RESUME URL']].map(([key,label])=><Field key={key} label={label} value={profile[key]} onChange={value=>patchProfile(key,value)}/>)}</div>
+          <div className="grid gap-4 sm:grid-cols-2">{[['displayName','NAME'],['headline','HEADLINE'],['location','LOCATION'],['email','CONTACT EMAIL'],['linkedinUrl','LINKEDIN URL'],['githubUrl','GITHUB URL'],['photoUrl','PROFILE IMAGE PATH'],['resumeUrl','RESUME URL']].map(([key,label])=><Field key={key} label={label} value={profile[key]} onChange={value=>patchProfile(key,value)}/>)}</div>
           <Field label="INTRODUCTION" multiline value={profile.introduction} onChange={value=>patchProfile('introduction',value)}/>
           <Field label="FOCUS AREAS (ONE PER LINE)" multiline value={profile.focus.join('\n')} onChange={value=>patchProfile('focus',value.split('\n').map(v=>v.trim()).filter(Boolean))}/>
           {['education','experience'].map(section=><div key={section} className="border-t border-[#b7b3a8] pt-5">
