@@ -108,7 +108,7 @@ export default function Admin() {
       })
       const result=await request('upload',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name:file.name,content:base64})})
-      update('profile',data=>({...data,learning:data.learning.map((item,i)=>i===index?{...item,image:result.url,url:item.url||result.url,placeholder:false}:item)}))
+      update('profile',data=>({...data,learning:data.learning.map((item,i)=>i===index?{...item,image:result.url,url:(!item.url || item.url.startsWith('/certificates/'))?result.url:item.url,placeholder:false}:item)}))
       notify('success','Image uploaded. Remember to save Certificates to publish it.')
     } catch(err){setError(err.message);notify('error',err.message)}
     finally{setBusy('')}
