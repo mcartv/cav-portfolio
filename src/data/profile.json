@@ -2,7 +2,7 @@
   "displayName": "CARL ARTHUR V BUENAVIDEZ",
   "headline": "4th Year BS Information Technology Student",
   "location": "Philippines",
-  "linkedinUrl": "",
+  "linkedinUrl": "https://www.linkedin.com/in/carl-arthur-buenavidez/",
   "photoUrl": "",
   "githubUrl": "https://github.com/mcartv",
   "resumeUrl": "",
@@ -42,5 +42,6 @@
       "placeholder": false
     }
   ],
-  "films": []
+  "films": [],
+  "email": "buenavidezcarlarthur@gmail.com"
 }
