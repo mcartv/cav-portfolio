@@ -4,6 +4,7 @@ import { projects } from './data/projects'
 import { profile } from './data/profile'
 import { DragHandle, FilmWindow, CertificatesWindow } from './components/ArchiveWindows'
 import ArcadeHub from './components/ArcadeHub'
+import ProjectGallery from './components/ProjectGallery'
 import Magnetic from './components/Magnetic'
 
 const skills = [
@@ -276,10 +277,23 @@ function ProjectModal({ selection, onClose }) {
           <div className="case-sequence case-sequence-1 flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={requestClose} disabled={phase==='collapsing'} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
           <div className="case-sequence case-sequence-2 mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
           <h2 id="project-modal-title" className="case-sequence case-sequence-3 editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
-          <div className="case-visual-wrap case-sequence case-sequence-4 relative overflow-hidden"><span className="case-visual-index pointer-events-none absolute right-3 top-3 z-10 border border-ink/20 bg-paper/90 px-2 py-1 font-mono text-[9px]">FIG. {project.id} / PROJECT STUDY</span><InterfacePreview project={project}/></div>
-          <p className="mt-2 font-mono text-[9px] uppercase tracking-wide text-ink/60">Illustrative UI mockup — not an actual project screenshot</p>
-          <div className="case-sequence case-sequence-5 mt-7 grid gap-6 md:grid-cols-[1.3fr_1fr]"><div><p className="font-mono text-[10px] text-signal">THE CONCEPT</p><p className="mt-2 max-w-xl text-sm leading-relaxed sm:text-base">{project.summary}</p></div><div><p className="font-mono text-[10px] text-signal">TECHNOLOGIES</p><div className="mt-3 flex flex-wrap gap-2">{project.stack.map(t => <span className="border border-ink px-3 py-2 font-mono text-[10px]" key={t}>{t}</span>)}</div></div></div>
-          <div className="case-sequence case-sequence-6 mt-7 flex flex-wrap gap-x-6 gap-y-3">{project.link && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer"><Github size={15}/> VIEW GITHUB REPOSITORY <ArrowUpRight size={15}/></a>}{project.live && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.live} target="_blank" rel="noopener noreferrer">LIVE APPLICATION <ArrowUpRight size={15}/></a>}</div>
+          <div className="case-visual-wrap case-sequence case-sequence-4 relative overflow-hidden">
+            <ProjectGallery project={project} fallback={<InterfacePreview project={project}/>}/>
+          </div>
+          <div className="case-sequence case-sequence-5 mt-9 grid gap-8 border-t border-ink/25 pt-7 md:grid-cols-[1.45fr_1fr]">
+            <div><p className="font-mono text-[10px] tracking-widest text-signal">01 / THE PROJECT</p><p className="mt-3 max-w-xl text-base leading-8">{project.summary}</p></div>
+            <aside className="border-l border-ink/20 pl-5"><p className="font-mono text-[10px] tracking-widest text-signal">TECHNOLOGY STACK</p><div className="mt-4 flex flex-wrap gap-2">{project.stack.map(t=><span className="border border-ink/70 px-3 py-2 font-mono text-[10px]" key={t}>{t}</span>)}</div></aside>
+          </div>
+          {(project.challenge||project.solution||project.contribution||project.highlights?.length>0)&&<div className="case-sequence case-sequence-5 mt-9 border-t border-ink/25 pt-7">
+            <p className="mb-6 font-mono text-[10px] tracking-widest text-signal">02 / BEHIND THE BUILD</p>
+            <div className="grid gap-7 md:grid-cols-2">
+              {project.challenge&&<div><h3 className="text-xl font-black tracking-tight">THE CHALLENGE</h3><p className="mt-3 whitespace-pre-line text-sm leading-7 text-ink/75">{project.challenge}</p></div>}
+              {project.solution&&<div><h3 className="text-xl font-black tracking-tight">THE SOLUTION</h3><p className="mt-3 whitespace-pre-line text-sm leading-7 text-ink/75">{project.solution}</p></div>}
+              {project.contribution&&<div><h3 className="text-xl font-black tracking-tight">MY CONTRIBUTION</h3><p className="mt-3 whitespace-pre-line text-sm leading-7 text-ink/75">{project.contribution}</p></div>}
+              {project.highlights?.length>0&&<div><h3 className="text-xl font-black tracking-tight">KEY DETAILS</h3><ul className="mt-3 space-y-3">{project.highlights.map((item,i)=><li className="flex gap-3 border-b border-ink/15 pb-2 text-sm leading-6" key={i}><span className="shrink-0 font-mono text-[10px] text-signal">{String(i+1).padStart(2,'0')}</span>{item}</li>)}</ul></div>}
+            </div>
+          </div>}
+          <div className="case-sequence case-sequence-6 mt-9 flex flex-wrap gap-x-6 gap-y-3 border-t border-ink/25 pt-6">{project.link && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.link} target="_blank" rel="noopener noreferrer"><Github size={15}/> VIEW GITHUB REPOSITORY <ArrowUpRight size={15}/></a>}{project.live && <a className="inline-flex items-center gap-2 border-b border-ink pb-1 font-mono text-xs hover:text-signal" href={project.live} target="_blank" rel="noopener noreferrer">LIVE APPLICATION <ArrowUpRight size={15}/></a>}</div>
         </section>
       )}
     </div>
