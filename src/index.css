@@ -451,6 +451,25 @@ a:focus-visible,
   .cinematic-case::before { transform:scaleX(1);animation:none!important; }
 }
 
+
+/* Interactive case-study gallery: restrained framing, precise controls. */
+.project-gallery-screen { isolation:isolate; }
+.project-gallery-screen img { display:block; }
+.gallery-arrow {
+  width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid #191919;background:transparent;color:#191919;
+  transition:background-color .25s ease,color .25s ease,transform .35s cubic-bezier(.16,1,.3,1);
+}
+.gallery-arrow:hover,.gallery-arrow:focus-visible {background:#191919;color:#f3f1ea;transform:translateY(-2px);}
+.gallery-thumb {transition:opacity .3s ease,border-color .3s ease,transform .3s ease;}
+.gallery-thumb:hover {transform:translateY(-3px);}
+.gallery-thumb:focus-visible {outline:2px solid var(--color-signal);outline-offset:2px;}
+.project-gallery-thumbs {scrollbar-width:thin;}
+.project-lightbox {animation:gallery-expand .35s cubic-bezier(.16,1,.3,1) both;}
+.project-lightbox img {box-shadow:0 20px 70px #0008;}
+@keyframes gallery-expand {from{opacity:0;transform:scale(1.014)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.project-lightbox{animation:none!important}.gallery-thumb,.gallery-arrow{transition:none!important}}
+
 /* Flip the selected card to its reverse before expanding into the case study. */
 .project-overlay {
   background-color: rgba(10, 10, 10, .52);
