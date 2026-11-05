@@ -25,8 +25,6 @@ export default function ArcadeHub({onExit}) {
         <button className="arcade-mode-exit inline-flex items-center gap-2 border border-[#58756e] px-4 py-3 font-mono text-[10px] tracking-wider transition-colors hover:bg-[#193037]" onClick={onExit}><ArrowLeft size={15}/> BACK TO PORTFOLIO</button>
       </header>
       <div className="mt-14 max-w-3xl">
-        <p className="font-mono text-[11px] tracking-[.2em] text-[#e99b7f]"><Sparkles size={15} className="mr-2 inline"/> UNAUTHORIZED ACCESS GRANTED</p>
-        <h1 id="arcade-menu-heading" className="mt-5 text-[clamp(54px,10vw,116px)] font-black leading-[.84] tracking-[-.09em]">THE HIDDEN<br/><span className="text-[#f49a7e]">ARCADE.</span></h1>
         <p className="mt-8 max-w-xl text-sm leading-7 text-[#9cb9b3]">You weren't supposed to find this. Since you're here, pick a protocol and see how long you can last.</p>
       </div>
       <div className="mt-12 grid gap-4 md:grid-cols-2">
