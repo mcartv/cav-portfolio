@@ -70,6 +70,12 @@ function validData(name, data) {
       && Array.isArray(data.experience) && Array.isArray(data.learning)
       && data.learning.length <= 100
       && data.learning.every(item => item && typeof item.title === 'string' && typeof item.issuer === 'string' && typeof item.date === 'string' && (!item.image || typeof item.image === 'string'))
+      && (data.films == null || (Array.isArray(data.films) && data.films.length <= 30 && data.films.every(film =>
+        film && typeof film.title === 'string' && film.title.length <= 150
+        && ['year','format','role','description'].every(field => film[field] == null || (typeof film[field] === 'string' && film[field].length <= (field === 'description' ? 3000 : 200)))
+        && (film.poster == null || (typeof film.poster === 'string' && (film.poster === '' || /^\\/films\\/[a-zA-Z0-9._-]+\\.(?:jpg|jpeg|png|webp)$/.test(film.poster))))
+        && (film.link == null || (typeof film.link === 'string' && (film.link === '' || /^https:\\/\\//.test(film.link))))
+      )))
   }
   if (!Array.isArray(data) || data.length < 2 || data.length > 30) return false
   const last = data[data.length - 1]
@@ -172,9 +178,9 @@ export default async function handler(req, res) {
       const file = req.body || {}
       if (!validImage(file)) return response(res,400,{error:'Upload a PNG, JPG or WebP image under 1.9MB'})
       const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g,'-')
-      const kind = file.kind === 'project' ? 'project' : file.kind === 'certificate' || file.kind == null ? 'certificate' : null
+      const kind = file.kind === 'project' ? 'project' : file.kind === 'film' ? 'film' : file.kind === 'certificate' || file.kind == null ? 'certificate' : null
       if (!kind) return response(res,400,{error:'Invalid image category'})
-      const path = 'public/' + (kind==='project'?'projects':'certificates') + '/' + Date.now().toString(36) + '-' + randomBytes(4).toString('hex') + '-' + name
+      const path = 'public/' + (kind==='project'?'projects':kind==='film'?'films':'certificates') + '/' + Date.now().toString(36) + '-' + randomBytes(4).toString('hex') + '-' + name
       await github(session.token,'repos/' + REPO + '/contents/' + path, {
         method:'PUT',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({message:'content: upload ' + kind + ' image',content:file.content,branch:BRANCH}),
