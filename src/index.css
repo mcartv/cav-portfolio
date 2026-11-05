@@ -390,17 +390,16 @@ a:focus-visible,
 }
 .portrait-parallax:hover::after { opacity:1; }
 .case-header {
-  /* Keep navigation readable as content scrolls beneath the header. */
+  /* This header is physically outside the scroll area: content cannot bleed above it. */
   isolation:isolate;
-  box-shadow:0 8px 20px rgba(243,241,234,.94);
+  box-shadow: 0 1px 0 rgba(25,25,25,.12);
 }
-.case-header::after {
-  content:'';
-  position:absolute;
-  left:0;right:0;bottom:-13px;height:12px;
-  pointer-events:none;
-  background:linear-gradient(to bottom,rgba(243,241,234,.72),transparent);
+.case-scroll-region {
+  scrollbar-color: #94958d transparent;
+  scrollbar-width: thin;
+  scroll-padding-top: 18px;
 }
+.case-scroll-region > :first-child { margin-top: 24px; }
 .case-close-button { position:relative; z-index:1; }
 @media (prefers-reduced-motion: reduce) {
   .case-close-button { transition:none!important; }
