@@ -94,7 +94,7 @@ function validData(name, data) {
     && typeof item.mark === 'string' && item.mark.length <= 12
     && ['challenge','solution','contribution'].every(k => item[k] == null || (typeof item[k] === 'string' && item[k].length <= 6000))
     && (item.highlights == null || (Array.isArray(item.highlights) && item.highlights.length <= 20 && item.highlights.every(v=>typeof v==='string'&&v.length<=300)))
-    && (item.screenshots == null || (Array.isArray(item.screenshots) && item.screenshots.length <= 12 && item.screenshots.every(v=>v && typeof v.src==='string' && /^\/projects\/[a-zA-Z0-9._-]+\.(?:jpg|jpeg|png|webp)$/.test(v.src) && (!v.caption || (typeof v.caption==='string' && v.caption.length <= 200)) && (!v.alt || (typeof v.alt==='string' && v.alt.length <= 200)) && (!v.label || (typeof v.label==='string' && v.label.length <= 100)))))
+    && (item.screenshots == null || (Array.isArray(item.screenshots) && item.screenshots.length <= 12 && item.screenshots.every(v=>v && typeof v.src==='string' && /^\/projects\/[a-zA-Z0-9._-]+\.(?:jpg|jpeg|png|webp)$/.test(v.src) && (!v.caption || (typeof v.caption==='string' && v.caption.length <= 200)) && (!v.alt || (typeof v.alt==='string' && v.alt.length <= 200)) && (!v.label || (typeof v.label==='string' && v.label.length <= 100))))))
 }
 function validImage(file) {
   if (!file || typeof file.content !== 'string' || typeof file.name !== 'string') return false
