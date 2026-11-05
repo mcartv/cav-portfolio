@@ -103,6 +103,13 @@ function newGame() {
     effects: [],
     active: null,
     activeTime: 0,
+    weaponTier: 0,
+    weaponFlash: 0,
+    shake: 0,
+    hitStop: 0,
+    banner: "",
+    bannerTime: 0,
+    bossKills: 0,
     spawnClock: 0.9,
     dropClock: 5,
     fireClock: 0,
@@ -149,9 +156,13 @@ function finishEnemy(g, e, blast = false) {
 
   if (e.boss) {
     g.bossActive = false;
+    g.bossKills++;
+    g.shake = Math.max(g.shake, 15);
+    g.banner = "MOTHERSHIP DOWN / +500";
+    g.bannerTime = 2.4;
     const type = TYPES[Math.floor(Math.random() * TYPES.length)];
     g.pickups.push({ x: e.x, y: e.y, type });
-    g.effects.push({ x: e.x, y: e.y, life: 0.55, boss: true });
+    g.effects.push({ x: e.x, y: e.y, life: 0.7, maxLife: 0.7, radius: 110, boss: true });
   } else if (Math.random() < (e.elite ? 0.24 : 0.055) && g.pickups.length < 4) {
     const type = TYPES[Math.floor(Math.random() * TYPES.length)];
     g.pickups.push({ x: e.x, y: e.y, type });
@@ -159,12 +170,12 @@ function finishEnemy(g, e, blast = false) {
 
   if ((blast || g.active === "blast") && !e.exploded) {
     e.exploded = true;
-    g.effects.push({ x: e.x, y: e.y, life: 0.32 });
+    g.effects.push({ x: e.x, y: e.y, life: 0.32, maxLife: 0.32, radius: g.weaponTier >= 2 && g.active === "blast" ? 130 : 82 });
     for (const other of g.enemies) {
       if (
         other.alive &&
         other !== e &&
-        Math.hypot(other.x - e.x, other.y - e.y) < 82
+        Math.hypot(other.x - e.x, other.y - e.y) < (g.active === "blast" && g.weaponTier >= 2 ? 130 : 82)
       ) {
         other.hp -= 2;
         if (other.hp <= 0) finishEnemy(g, other, false);
@@ -175,10 +186,20 @@ function finishEnemy(g, e, blast = false) {
 function hitEnemy(g, e, bullet) {
   if (!e.alive || bullet.hitIds.has(e.id)) return;
   bullet.hitIds.add(e.id);
-  e.hp -= 1;
-  if (bullet.kind === "freeze") e.slowUntil = g.elapsed + 2.8;
+  e.hp -= bullet.kind === "pierce" && bullet.tier >= 2 ? 2 : 1;
+  e.flash = 0.14;
+  g.shake = Math.max(g.shake, e.boss ? 4.5 : 1.6);
+  g.effects.push({ x: bullet.x, y: bullet.y, life: 0.13, maxLife: 0.13, radius: 12, color: bullet.kind === "freeze" ? "#7ce7ec" : "#f6d3a3" });
+  if (bullet.kind === "freeze") e.slowUntil = g.elapsed + (bullet.tier >= 2 ? 5.3 : 2.8);
+  if (e.boss && e.hp <= e.maxHp * 0.5 && e.phase !== 2) {
+    e.phase = 2;
+    e.fireCooldown = 0.4;
+    g.banner = "WARNING / PHASE TWO";
+    g.bannerTime = 2.2;
+    g.shake = 13;
+  }
   if (e.hp <= 0) finishEnemy(g, e, bullet.kind === "blast");
-  else makeParticles(g, e.x, e.y, "#d5dcbe", 4);
+  else makeParticles(g, e.x, e.y, "#d5dcbe", e.boss ? 7 : 4);
   if (bullet.kind !== "pierce") bullet.dead = true;
 }
 const small = "font-mono text-[10px] tracking-[.13em]";
@@ -197,6 +218,9 @@ function createBoss(id, minute) {
     slowUntil: 0,
     entered: true,
     fireCooldown: 0.9,
+    phase: 1,
+    flash: 0,
+    pattern: 0,
     exploded: false,
   };
 }
@@ -248,6 +272,13 @@ function drawActiveShipEffect(ctx, g) {
     ctx.stroke();
   }
 
+  if (g.weaponTier >= 2) {
+    ctx.strokeStyle = power.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - 28, y - 23, 56, 36);
+    ctx.fillStyle = power.color;
+    ctx.fillRect(x - 4, y - 29, 8, 4);
+  }
   ctx.restore();
 }
 
@@ -264,6 +295,10 @@ export default function EndlessShooter({ onExit }) {
     time: 0,
     active: null,
     remaining: 0,
+    tier: 0,
+    boss: false,
+    bossKills: 0,
+    banner: "",
     best: game.current.best,
   });
   const [muted, setMuted] = useState(true);
@@ -303,6 +338,10 @@ export default function EndlessShooter({ onExit }) {
       time: 0,
       active: null,
       remaining: 0,
+      tier: 0,
+      boss: false,
+      bossKills: 0,
+      banner: "",
       best: game.current.best,
     });
   }, []);
@@ -358,6 +397,9 @@ export default function EndlessShooter({ onExit }) {
           g.elapsed < 60 ? 0.72 + g.elapsed / 95 : 1.35 + (g.elapsed - 60) / 32;
 
         g.level = 1 + Math.floor(g.elapsed / 25);
+        g.weaponFlash = Math.max(0, g.weaponFlash - dt);
+        g.bannerTime = Math.max(0, g.bannerTime - dt);
+        g.shake = Math.max(0, g.shake - dt * 38);
         g.invuln = Math.max(0, g.invuln - dt);
         g.shipX = clamp(
           g.shipX +
@@ -367,14 +409,15 @@ export default function EndlessShooter({ onExit }) {
         );
         g.fireClock -= dt;
         if (keys.current.fire && g.fireClock <= 0) {
-          const spread = g.active === "spread" ? [-1, 0, 1] : [0];
+          const spread = g.active === "spread" ? (g.weaponTier >= 2 ? [-2, -1, 0, 1, 2] : [-1, 0, 1]) : [0];
           spread.forEach((dir) =>
             g.shots.push({
               x: g.shipX,
               y: PY - 14,
-              vx: dir * 180,
+              vx: dir * (g.weaponTier >= 2 ? 125 : 180),
               vy: -540,
               kind: g.active,
+              tier: g.weaponTier,
               hitIds: new Set(),
               dead: false,
             }),
@@ -386,6 +429,7 @@ export default function EndlessShooter({ onExit }) {
         if (g.active && g.activeTime <= 0) {
           g.active = null;
           g.activeTime = 0;
+          g.weaponTier = 0;
         }
         g.spawnClock -= dt;
         if (g.spawnClock <= 0) {
@@ -425,6 +469,9 @@ export default function EndlessShooter({ onExit }) {
         if (g.bossTimer <= 0 && !g.bossActive) {
           g.bossActive = true;
           g.bossTimer = 60;
+          g.banner = "ALERT / MOTHERSHIP INBOUND";
+          g.bannerTime = 3;
+          g.shake = 8;
           const bossMinute = Math.max(1, Math.floor(g.elapsed / 60));
           g.enemies.push(createBoss(++g.tag, bossMinute));
         }
@@ -452,23 +499,26 @@ export default function EndlessShooter({ onExit }) {
             const slow = e.slowUntil > g.elapsed ? 0.35 : 1;
 
             if (e.boss) {
-              e.x += e.vx * slow * dt;
-              if (e.x < 62 || e.x > W - 62) e.vx *= -1;
-
+              e.x += e.vx * slow * (e.phase === 2 ? 1.45 : 1) * dt;
+              if (e.x < 62 || e.x > W - 62) {
+                e.x = clamp(e.x, 62, W - 62);
+                e.vx *= -1;
+              }
               e.fireCooldown -= dt;
               if (e.fireCooldown <= 0) {
-                e.fireCooldown = Math.max(
-                  0.34,
-                  0.82 - Math.min(0.28, g.elapsed / 180),
-                );
-                [-90, -30, 30, 90].forEach((vx) => {
-                  g.enemyShots.push({
-                    x: e.x,
-                    y: e.y + 18,
-                    vx,
-                    vy: 220 + difficulty * 12,
-                  });
-                });
+                e.pattern++;
+                const speed = 185 + Math.min(75, difficulty * 12);
+                if (e.phase === 1) {
+                  // Three deliberate lanes make the first phase learnable.
+                  [-65, 0, 65].forEach(vx => g.enemyShots.push({x:e.x,y:e.y+28,vx,vy:speed}));
+                  e.fireCooldown = 1.05;
+                } else {
+                  // Phase two alternates between broad fan and aimed bursts.
+                  const aimed = clamp((g.shipX-e.x)*0.58,-120,120);
+                  const angles = e.pattern % 2 === 0 ? [-160,-80,0,80,160] : [aimed-32,aimed,aimed+32];
+                  angles.forEach(vx => g.enemyShots.push({x:e.x,y:e.y+28,vx,vy:speed+32}));
+                  e.fireCooldown = 0.68;
+                }
               }
             } else {
               e.y += e.vy * slow * dt;
@@ -477,6 +527,7 @@ export default function EndlessShooter({ onExit }) {
             }
           }
         g.enemies = g.enemies.filter((e) => e.alive);
+        for (const e of g.enemies) e.flash = Math.max(0,(e.flash || 0)-dt);
         for (const b of g.shots) {
           b.x += b.vx * dt;
           b.y += b.vy * dt;
@@ -490,7 +541,7 @@ export default function EndlessShooter({ onExit }) {
           if (b.dead) continue;
           for (const e of g.enemies) {
             if (!e.alive) continue;
-            if (Math.abs(e.x - b.x) < 19 && Math.abs(e.y - b.y) < 18) {
+            if (Math.abs(e.x - b.x) < (e.boss ? 31 : 19) && Math.abs(e.y - b.y) < (e.boss ? 26 : 18)) {
               hitEnemy(g, e, b);
               if (b.dead) break;
             }
@@ -506,8 +557,12 @@ export default function EndlessShooter({ onExit }) {
             Math.abs(pickup.y - PY) < 23
           ) {
             pickup.collected = true;
+            g.weaponTier = g.active === pickup.type && g.activeTime > 0 ? 2 : 1;
             g.active = pickup.type;
-            g.activeTime = POWER[pickup.type].duration;
+            g.activeTime = POWER[pickup.type].duration + (g.weaponTier === 2 ? 4 : 0);
+            g.weaponFlash = 1.3;
+            g.banner = (g.weaponTier === 2 ? "WEAPON EVOLVED / " : "WEAPON ACQUIRED / ") + POWER[pickup.type].label;
+            g.bannerTime = 1.8;
             sound(780, 0.16);
             makeParticles(g, pickup.x, pickup.y, POWER[pickup.type].color, 16);
           }
@@ -528,6 +583,7 @@ export default function EndlessShooter({ onExit }) {
             if (shotCollision) shotCollision.hit = true;
             g.lives--;
             g.invuln = 1.6;
+            g.shake = Math.max(g.shake, 14);
             sound(95, 0.24);
             makeParticles(g, g.shipX, PY, "#ef796b", 20);
             if (g.lives <= 0) {
@@ -559,6 +615,10 @@ export default function EndlessShooter({ onExit }) {
             time: Math.floor(g.elapsed),
             active: g.active,
             remaining: Math.max(0, Math.ceil(g.activeTime)),
+            tier: g.weaponTier,
+            boss: g.bossActive,
+            bossKills: g.bossKills,
+            banner: g.bannerTime > 0 ? g.banner : "",
             best: Math.max(g.best, g.score),
           });
         }
