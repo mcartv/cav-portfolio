@@ -180,8 +180,33 @@ function ProjectModal({ selection, onClose }) {
   const project = selection?.project
   const sourceRect = selection?.rect
   const closeRef = useRef(null)
+  const modalRef = useRef(null)
+  const closeTimers = useRef([])
+  const closing = useRef(false)
+  const [closeMotion, setCloseMotion] = useState({})
   const [phase, setPhase] = useState('flip')
   const reducedMotion = useRef(false)
+  const requestClose = useCallback(() => {
+    if(closing.current)return
+    closing.current=true
+    closeTimers.current.forEach(window.clearTimeout)
+    closeTimers.current=[]
+    if(reducedMotion.current){onClose();return}
+    const rect = modalRef.current?.getBoundingClientRect()
+    const dest = sourceRect
+    if(rect && dest){
+      const dx=dest.left+dest.width/2-(rect.left+rect.width/2)
+      const dy=dest.top+dest.height/2-(rect.top+rect.height/2)
+      setCloseMotion({
+        '--close-x':dx+'px','--close-y':dy+'px',
+        '--close-sx':Math.min(1,dest.width/rect.width),
+        '--close-sy':Math.min(1,dest.height/rect.height)
+      })
+    } else setCloseMotion({})
+    setPhase('collapsing')
+    closeTimers.current.push(window.setTimeout(()=>setPhase('reverse'),610))
+    closeTimers.current.push(window.setTimeout(onClose,1370))
+  },[onClose,sourceRect])
 
   useEffect(() => {
     if (!project) return undefined
@@ -189,12 +214,14 @@ function ProjectModal({ selection, onClose }) {
     const previous = document.activeElement
     reducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     document.body.style.overflow = 'hidden'
+    closing.current=false
+    setCloseMotion({})
     setPhase(reducedMotion.current ? 'expanded' : 'flip')
     const animation = reducedMotion.current ? 0 : 720
-    const timer = window.setTimeout(() => setPhase('expanded'), animation)
-    const focusTimer = window.setTimeout(() => closeRef.current?.focus(), animation + 35)
+    const timer = window.setTimeout(() => {if(!closing.current)setPhase('expanded')}, animation)
+    const focusTimer = window.setTimeout(() => {if(!closing.current)closeRef.current?.focus()}, animation + 35)
     const onKey = e => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') requestClose()
       if (e.key !== 'Tab') return
       const root = document.querySelector('[data-project-modal]')
       if (!root) { e.preventDefault(); return }
@@ -207,11 +234,13 @@ function ProjectModal({ selection, onClose }) {
     return () => {
       window.clearTimeout(timer)
       window.clearTimeout(focusTimer)
+      closeTimers.current.forEach(window.clearTimeout)
+      closeTimers.current=[]
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = oldOverflow
       previous?.focus?.()
     }
-  }, [project, onClose])
+  }, [project, onClose, requestClose])
 
   if (!project) return null
   const centerX = sourceRect ? sourceRect.left + sourceRect.width / 2 : window.innerWidth / 2
@@ -221,15 +250,15 @@ function ProjectModal({ selection, onClose }) {
     '--source-offset-y': (centerY - window.innerHeight / 2) + 'px',
   }
   return (
-    <div style={originStyle} className={'project-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 sm:p-8 ' + (phase === 'expanded' ? 'overlay-expanded' : 'overlay-flip')} onPointerDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      {phase === 'flip' ? (
+    <div style={originStyle} className={'project-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-3 sm:p-8 ' + (phase === 'reverse' ? 'overlay-reverse' : phase === 'collapsing' ? 'overlay-collapsing' : phase === 'expanded' ? 'overlay-expanded' : 'overlay-flip')} onPointerDown={e => { if (e.target === e.currentTarget) requestClose() }}>
+      {phase === 'flip' || phase === 'reverse' ? (
         <div className="flip-stage" aria-hidden="true" style={sourceRect ? {
           left: sourceRect.left,
           top: sourceRect.top,
           width: sourceRect.width,
           height: sourceRect.height,
         } : { left: '50%', top: '50%', width: 280, height: 340, transform: 'translate(-50%, -50%)' }}>
-          <div className="flip-object">
+          <div className={'flip-object '+(phase==='reverse'?'flip-object-reverse':'')}>
             <div className="flip-face flip-front">
               <div className="flex justify-between gap-2 font-mono text-[8px] sm:text-[10px]"><span>{project.id} / {project.type}</span><span>{project.year}</span></div>
               <ProjectArtwork project={project}/>
@@ -243,8 +272,8 @@ function ProjectModal({ selection, onClose }) {
           </div>
         </div>
       ) : (
-        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" className="expanded-project cinematic-case relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10">
-          <div className="case-sequence case-sequence-1 flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={onClose} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
+        <section data-project-modal role="dialog" aria-modal="true" aria-labelledby="project-modal-title" ref={modalRef} style={phase==='collapsing'?closeMotion:undefined} className={'expanded-project cinematic-case relative max-h-[94dvh] w-full max-w-5xl overflow-y-auto bg-paper p-4 shadow-2xl sm:p-8 lg:p-10 '+(phase==='collapsing'?'case-study-contract':'')}>
+          <div className="case-sequence case-sequence-1 flex items-center justify-between border-b border-ink pb-3 font-mono text-[10px] sm:text-xs"><span>PROJECT FILE / {project.id} — CASE STUDY</span><button ref={closeRef} onClick={requestClose} disabled={phase==='collapsing'} aria-label="Close project details" className="p-2 hover:text-signal"><X/></button></div>
           <div className="case-sequence case-sequence-2 mt-6 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] text-signal"><span>{project.type}</span><span>{project.year} / INTERFACE EXCERPT</span></div>
           <h2 id="project-modal-title" className="case-sequence case-sequence-3 editorial-heading my-5 text-[clamp(45px,8vw,105px)]">{project.title}<span className="text-signal">.</span></h2>
           <div className="case-visual-wrap case-sequence case-sequence-4 relative overflow-hidden"><span className="case-visual-index pointer-events-none absolute right-3 top-3 z-10 border border-ink/20 bg-paper/90 px-2 py-1 font-mono text-[9px]">FIG. {project.id} / PROJECT STUDY</span><InterfacePreview project={project}/></div>
