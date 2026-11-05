@@ -389,9 +389,21 @@ a:focus-visible,
   transition:opacity .5s ease;
 }
 .portrait-parallax:hover::after { opacity:1; }
-.case-scroll-fade {
-  /* The sticky soft mask hides typography as it passes behind the modal's top edge. */
-  background:linear-gradient(to bottom,rgba(243,241,234,.98) 0%,rgba(243,241,234,.93) 25%,rgba(243,241,234,.65) 55%,rgba(243,241,234,0) 100%);
+.case-header {
+  /* Keep navigation readable as content scrolls beneath the header. */
+  isolation:isolate;
+  box-shadow:0 8px 20px rgba(243,241,234,.94);
+}
+.case-header::after {
+  content:'';
+  position:absolute;
+  left:0;right:0;bottom:-13px;height:12px;
+  pointer-events:none;
+  background:linear-gradient(to bottom,rgba(243,241,234,.72),transparent);
+}
+.case-close-button { position:relative; z-index:1; }
+@media (prefers-reduced-motion: reduce) {
+  .case-close-button { transition:none!important; }
 }
 .cinematic-case::before {
   content:'';
