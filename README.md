@@ -112,28 +112,6 @@ Its design uses a distinct cinematic identity with:
 
 The archive can be populated through Content Studio without modifying application code.
 
-### Hidden Pixel Arcade
-
-An interactive Easter egg accessible through a small pixel-art aircraft within the portfolio.
-
-Activating the aircraft reveals a hidden arcade with two playable modes.
-
-**Classic Invasion**
-- Retro Space Invaders-inspired gameplay.
-- Increasingly challenging enemy formations.
-- Player movement, shooting, scoring, and lives.
-- Keyboard and touch controls.
-
-**Endless Survival**
-- Continuous enemy spawning and progressive difficulty.
-- Boss encounters with multiple attack phases.
-- Collectible weapon power-ups.
-- Upgradeable weapons and defensive shields.
-- Pixel-art effects, explosions, and combat feedback.
-- Locally stored personal high scores.
-
-Both modes are implemented using the HTML Canvas API.
-
 ---
 
 ## 03. Featured Projects
