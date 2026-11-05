@@ -205,8 +205,9 @@ function ProjectModal({ selection, onClose }) {
       })
     } else setCloseMotion({})
     setPhase('collapsing')
-    closeTimers.current.push(window.setTimeout(()=>setPhase('reverse'),610))
-    closeTimers.current.push(window.setTimeout(onClose,1370))
+    // Keep the reverse flip in continuous motion: fast return, then immediate turn.
+    closeTimers.current.push(window.setTimeout(()=>setPhase('reverse'),380))
+    closeTimers.current.push(window.setTimeout(onClose,825))
   },[onClose,sourceRect])
 
   useEffect(() => {
