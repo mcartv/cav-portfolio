@@ -464,16 +464,17 @@ export default function EndlessShooter({ onExit }) {
             slowUntil: 0,
           });
         }
-        g.bossTimer -= dt;
-
-        if (g.bossTimer <= 0 && !g.bossActive) {
-          g.bossActive = true;
-          g.bossTimer = 60;
-          g.banner = "ALERT / MOTHERSHIP INBOUND";
-          g.bannerTime = 3;
-          g.shake = 8;
-          const bossMinute = Math.max(1, Math.floor(g.elapsed / 60));
-          g.enemies.push(createBoss(++g.tag, bossMinute));
+        // Minute milestones are absolute, so an overdue boss never chains instantly.
+        if (g.elapsed >= g.nextBossAt) {
+          const bossMinute = Math.floor(g.nextBossAt / 60);
+          g.nextBossAt += 60;
+          if (!g.bossActive) {
+            g.bossActive = true;
+            g.banner = "ALERT / MOTHERSHIP INBOUND";
+            g.bannerTime = 3;
+            g.shake = 8;
+            g.enemies.push(createBoss(++g.tag, bossMinute));
+          }
         }
         g.dropClock -= dt;
         if (g.dropClock <= 0) {
@@ -487,7 +488,7 @@ export default function EndlessShooter({ onExit }) {
         }
         g.enemyFireClock -= dt;
         const shooters = g.enemies.filter(
-          (e) => e.alive && e.y > 38 && e.y < 420,
+          (e) => e.alive && !e.boss && e.y > 38 && e.y < 420,
         );
         if (g.enemyFireClock <= 0 && shooters.length) {
           g.enemyFireClock = Math.max(0.25, 1.6 - difficulty * 0.19);
