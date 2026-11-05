@@ -62,18 +62,28 @@ export default function Admin() {
   }
   useEffect(()=>{
     let live=true
-    request('status').then(()=>{
-      if (!live) return
-      setAuth('ready')
-      return Promise.all(['profile','projects'].map(name=>request('content&name='+name))).then(([profile,projects])=>{
+    // Authentication errors and content-fetch errors need different UI states.
+    // A temporary GitHub failure must not send an authenticated editor back to login.
+    const initialize=async()=>{
+      try {
+        await request('status')
+        if (!live) return
+        setAuth('ready')
+      } catch(err) {
+        if (!live) return
+        setAuth(err.message.includes('not configured')?'setup':'login')
+        setError(err.message)
+        return
+      }
+      try {
+        const [profile,projects]=await Promise.all(['profile','projects'].map(name=>request('content&name='+name)))
         if (live) setDocuments({profile,projects})
-      })
-    }).catch(err=>{
-      if (!live) return
-      setAuth(err.message.includes('not configured')?'setup':'login')
-      setError(err.message)
-    })
-    return ()=>{ live=false }
+      } catch(err) {
+        if (live) setError('Could not load portfolio content: '+err.message+'. Use Retry Loading Content to try again.')
+      }
+    }
+    initialize()
+    return ()=>{live=false}
   },[])
   const profile = documents.profile?.data
   const projects = documents.projects?.data
