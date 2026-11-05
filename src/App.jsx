@@ -138,7 +138,7 @@ function ProjectArtwork({ project }) {
       <div className="art-orbit absolute inset-[23%] rounded-full border border-dashed border-ink/30"/>
       <div className="art-window relative flex h-[65%] w-[73%] rotate-[-7deg] flex-col border border-ink bg-[#faf9f3] p-3 shadow-[12px_13px_0px_#00000017]">
         <div className="flex gap-1.5"><i className="h-1.5 w-1.5 rounded-full bg-ink"/><i className="h-1.5 w-1.5 rounded-full bg-ink/40"/><i className="h-1.5 w-1.5 rounded-full bg-ink/20"/></div>
-        <div className="my-auto"><div className="text-[clamp(25px,4vw,47px)] font-black leading-none tracking-[-.09em]">{project.mark}<span className="text-signal">.</span></div><div className="mt-2 h-1.5 w-4/5 bg-ink/25"/><div className="mt-2 h-1.5 w-1/2 bg-ink/15"/></div>
+        {project.screenshots?.[0]?.src ? <div className="project-card-cover relative my-3 min-h-0 flex-1 overflow-hidden border border-ink/15 bg-[#e4e8de]"><img src={project.screenshots[0].src} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.045]"/><span className="absolute bottom-0 right-0 bg-paper/95 px-2 py-1 font-mono text-[8px]">PROJECT / PREVIEW</span></div> : <div className="my-auto"><div className="text-[clamp(25px,4vw,47px)] font-black leading-none tracking-[-.09em]">{project.mark}<span className="text-signal">.</span></div><div className="mt-2 h-1.5 w-4/5 bg-ink/25"/><div className="mt-2 h-1.5 w-1/2 bg-ink/15"/></div>}
         <div className="font-mono text-[8px] tracking-wide">{project.slug.toUpperCase()}</div>
       </div>
       <span className="absolute bottom-3 right-3 font-mono text-[9px]">ARCHIVE / {project.id}</span>
