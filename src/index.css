@@ -168,6 +168,133 @@ a:focus-visible,
   transform: translate3d(0, 0, 0);
 }
 
+/* STORY / 001 — editorial scroll narrative
+   Elements are hidden only when the JS observer marks them ready.
+   The carousel's 3D cards and dialogs keep their independent transforms. */
+.story-ready[data-story="fade"],
+.story-ready[data-story="aside"],
+.story-ready[data-story="portrait"],
+.story-ready[data-story="skill"] {
+  opacity:0;
+  translate:0 32px;
+  filter:blur(4px);
+}
+.story-ready[data-story="portrait"] {
+  translate:-35px 34px;
+  filter:blur(7px) grayscale(.2);
+}
+.story-ready[data-story="aside"] {translate:30px 18px;}
+.story-ready[data-story="skill"] {translate:32px 0;}
+.story-ready[data-story="fade"],
+.story-ready[data-story="aside"],
+.story-ready[data-story="portrait"],
+.story-ready[data-story="skill"] {
+  transition:
+    opacity .72s cubic-bezier(.16,1,.3,1),
+    translate .86s cubic-bezier(.16,1,.3,1),
+    filter .72s ease;
+}
+.story-ready.is-visible[data-story="fade"],
+.story-ready.is-visible[data-story="aside"],
+.story-ready.is-visible[data-story="portrait"],
+.story-ready.is-visible[data-story="skill"] {
+  opacity:1;
+  translate:0 0;
+  filter:blur(0);
+}
+#about .story-aside:nth-child(1) {transition-delay:.04s;}
+#about .story-aside:nth-child(2) {transition-delay:.11s;}
+#about .story-aside:nth-child(3) {transition-delay:.17s;}
+#about .story-aside:nth-child(4) {transition-delay:.22s;}
+#about .story-aside:nth-child(5) {transition-delay:.27s;}
+.story-ready[data-story="headline"] .story-line {
+  display:block;
+  overflow:hidden;
+  /* preserve italic descenders and prevent hard clipping */
+  padding:.06em .04em .07em;
+  margin:-.06em -.04em -.07em;
+}
+.story-headline .story-line {display:block;}
+.story-headline .story-line > span {
+  display:block;
+  transition:translate .92s cubic-bezier(.16,1,.3,1),opacity .75s ease;
+}
+.story-ready[data-story="headline"] .story-line > span {
+  translate:0 115%;
+  opacity:.2;
+}
+.story-ready.is-visible[data-story="headline"] .story-line > span {
+  translate:0 0;
+  opacity:1;
+}
+.story-headline .story-line:nth-child(2) > span {transition-delay:.14s;}
+.story-ready[data-story="divider"] {opacity:.35;transition:opacity .85s ease;}
+.story-ready.is-visible[data-story="divider"] {opacity:1;}
+.story-ready[data-story="divider"]::before,
+.story-ready[data-story="divider"]::after {
+  transform:scaleX(.02);
+  transition:transform 1.2s cubic-bezier(.16,1,.3,1);
+}
+.story-ready.is-visible[data-story="divider"]::before,
+.story-ready.is-visible[data-story="divider"]::after {transform:scaleX(1);}
+.story-ready[data-story="rule"] .section-label::before {transform:scaleX(0);}
+.story-ready.is-visible[data-story="rule"] .section-label::before {transform:scaleX(1);}
+.story-ready[data-story="rule"] .section-label {
+  opacity:.4;
+  transition:opacity .65s ease;
+}
+.story-ready.is-visible[data-story="rule"] .section-label {opacity:1;}
+.story-ready[data-story="carousel"] {
+  opacity:0;
+  translate:0 52px;
+  filter:blur(7px);
+  transition:opacity .95s ease,translate 1.05s cubic-bezier(.16,1,.3,1),filter 1.05s ease;
+}
+.story-ready.is-visible[data-story="carousel"] {
+  opacity:1;
+  translate:0 0;
+  filter:blur(0);
+}
+.story-ready[data-story="skill"] {
+  transition-delay:calc(var(--skill-index,0)*95ms);
+}
+.story-skill::after {
+  content:'';
+  position:absolute;
+  bottom:-1px;
+  left:0;
+  width:100%;
+  height:1px;
+  background:var(--color-signal);
+  transform:scaleX(0);
+  transform-origin:left;
+  opacity:.75;
+  pointer-events:none;
+  transition:transform .8s cubic-bezier(.16,1,.3,1);
+}
+.story-skill.is-visible::after {transform:scaleX(1);}
+.toolkit-section::before {
+  content:'';
+  position:absolute;pointer-events:none;
+  right:2%;top:16%;
+  width:clamp(220px,35vw,510px);
+  aspect-ratio:1;
+  border-radius:50%;
+  border:1px solid rgba(25,25,25,.06);
+  box-shadow:0 0 0 48px rgba(25,25,25,.015),0 0 0 98px rgba(25,25,25,.012);
+}
+@media(max-width:640px) {
+  .story-ready[data-story="portrait"] {translate:0 22px;}
+  .story-ready[data-story="aside"],.story-ready[data-story="skill"] {translate:0 20px;}
+  .story-ready[data-story="carousel"] {translate:0 18px;filter:none;}
+  .story-ready[data-story="fade"] {translate:0 20px;filter:none;}
+}
+@media(prefers-reduced-motion:reduce) {
+  [data-story],[data-story] * {transition-duration:0s!important;animation-duration:0s!important;}
+  [data-story] {opacity:1!important;translate:none!important;filter:none!important;}
+  .story-line > span {translate:none!important;opacity:1!important;}
+}
+
 /* INDEX/ — expressive editorial motion system. All visual effects are progressive. */
 .site-header {
   background-color: rgba(243,241,234,.98);
