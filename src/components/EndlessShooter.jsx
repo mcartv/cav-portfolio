@@ -66,6 +66,11 @@ const POWER = {
   },
 };
 const TYPES = Object.keys(POWER);
+const SHIELD = {label:"ENERGY SHIELD",symbol:"SH",color:"#76edc5",detail:"Absorbs one hit (up to 2 charges)"};
+const PICKUPS = [...TYPES,"shield"];
+const pickupInfo = type => type==="shield"?SHIELD:POWER[type];
+const enemySpeed = seconds => 38+Math.min(16,seconds/60*16)+Math.max(0,seconds-60)*.58;
+const bulletSpeed = seconds => 78+Math.min(24,seconds/60*24)+Math.max(0,seconds-60)*.7;
 function sprite(ctx, shape, x, y, scale, color) {
   ctx.fillStyle = color;
   shape.forEach((r, i) => {
@@ -95,6 +100,8 @@ function newGame() {
     level: 1,
     shipX: W / 2,
     invuln: 0,
+    shields: 0,
+    shieldFlash: 0,
     shots: [],
     enemies: [],
     enemyShots: [],
@@ -113,7 +120,7 @@ function newGame() {
     spawnClock: 0.9,
     dropClock: 5,
     fireClock: 0,
-    enemyFireClock: 2,
+    enemyFireClock: 2.7,
     tag: 0,
     bossTimer: 60,
     bossActive: false,
@@ -160,11 +167,11 @@ function finishEnemy(g, e, blast = false) {
     g.shake = Math.max(g.shake, 15);
     g.banner = "MOTHERSHIP DOWN / +500";
     g.bannerTime = 2.4;
-    const type = TYPES[Math.floor(Math.random() * TYPES.length)];
+    const type = PICKUPS[Math.floor(Math.random() * PICKUPS.length)];
     g.pickups.push({ x: e.x, y: e.y, type });
     g.effects.push({ x: e.x, y: e.y, life: 0.7, maxLife: 0.7, radius: 110, boss: true });
   } else if (Math.random() < (e.elite ? 0.24 : 0.055) && g.pickups.length < 4) {
-    const type = TYPES[Math.floor(Math.random() * TYPES.length)];
+    const type = PICKUPS[Math.floor(Math.random() * PICKUPS.length)];
     g.pickups.push({ x: e.x, y: e.y, type });
   }
 
@@ -299,6 +306,7 @@ export default function EndlessShooter({ onExit }) {
     boss: false,
     bossKills: 0,
     banner: "",
+    shields: 0,
     best: game.current.best,
   });
   const [muted, setMuted] = useState(true);
@@ -342,6 +350,7 @@ export default function EndlessShooter({ onExit }) {
       boss: false,
       bossKills: 0,
       banner: "",
+      shields: 0,
       best: game.current.best,
     });
   }, []);
@@ -401,6 +410,7 @@ export default function EndlessShooter({ onExit }) {
         g.bannerTime = Math.max(0, g.bannerTime - dt);
         g.shake = Math.max(0, g.shake - dt * 38);
         g.invuln = Math.max(0, g.invuln - dt);
+        g.shieldFlash = Math.max(0, g.shieldFlash - dt);
         g.shipX = clamp(
           g.shipX +
             (Number(keys.current.right) - Number(keys.current.left)) * 310 * dt,
@@ -435,28 +445,23 @@ export default function EndlessShooter({ onExit }) {
         if (g.spawnClock <= 0) {
           const spawnBase =
             g.elapsed < 60
-              ? 1.45 - difficulty * 0.16
-              : 1.05 - difficulty * 0.12;
+              ? 1.92 - g.elapsed * .006
+              : 1.56 - Math.min(1.17,(g.elapsed-60)*.006);
 
           g.spawnClock =
             Math.max(0.24, spawnBase) * (0.72 + Math.random() * 0.55);
 
           const elite =
             g.elapsed < 60
-              ? Math.random() < Math.min(0.18, 0.03 + difficulty * 0.03)
-              : Math.random() < Math.min(0.47, 0.08 + difficulty * 0.05);
+              ? Math.random() < .035 + g.elapsed * .0006
+              : Math.random() < Math.min(.44,.075+(g.elapsed-60)*.0011);
 
           g.enemies.push({
             id: ++g.tag,
             x: 23 + Math.random() * (W - 46),
             y: -25,
             vx: (Math.random() - 0.5) * 28,
-            vy:
-              g.elapsed < 60
-                ? (52 + Math.random() * 18 + difficulty * 10) *
-                  (elite ? 0.82 : 1)
-                : (68 + Math.random() * 28 + difficulty * 18) *
-                  (elite ? 0.82 : 1),
+            vy:(enemySpeed(g.elapsed)+Math.random()*(10+Math.min(25,g.elapsed*.06)))*(elite?.85:1),
             hp: elite ? Math.ceil(2 + difficulty * 0.42) : 1,
             elite,
             boss: false,
@@ -483,7 +488,7 @@ export default function EndlessShooter({ onExit }) {
             g.pickups.push({
               x: 34 + Math.random() * (W - 68),
               y: -8,
-              type: TYPES[Math.floor(Math.random() * 4)],
+              type: PICKUPS[Math.floor(Math.random() * PICKUPS.length)],
             });
         }
         g.enemyFireClock -= dt;
@@ -491,9 +496,9 @@ export default function EndlessShooter({ onExit }) {
           (e) => e.alive && !e.boss && e.y > 38 && e.y < 420,
         );
         if (g.enemyFireClock <= 0 && shooters.length) {
-          g.enemyFireClock = Math.max(0.25, 1.6 - difficulty * 0.19);
+          g.enemyFireClock = Math.max(.46,2.8-g.elapsed*.008);
           const e = shooters[Math.floor(Math.random() * shooters.length)];
-          g.enemyShots.push({ x: e.x, y: e.y + 14, vy: 170 + difficulty * 24 });
+          g.enemyShots.push({ x: e.x, y: e.y + 14, vy: bulletSpeed(g.elapsed) + Math.random()*12 });
         }
         for (const e of g.enemies)
           if (e.alive) {
@@ -508,17 +513,17 @@ export default function EndlessShooter({ onExit }) {
               e.fireCooldown -= dt;
               if (e.fireCooldown <= 0) {
                 e.pattern++;
-                const speed = 185 + Math.min(75, difficulty * 12);
+                const speed = bulletSpeed(g.elapsed)+40;
                 if (e.phase === 1) {
                   // Three deliberate lanes make the first phase learnable.
                   [-65, 0, 65].forEach(vx => g.enemyShots.push({x:e.x,y:e.y+28,vx,vy:speed}));
-                  e.fireCooldown = 1.05;
+                  e.fireCooldown = Math.max(.65,1.35-g.elapsed*.002);
                 } else {
                   // Phase two alternates between broad fan and aimed bursts.
                   const aimed = clamp((g.shipX-e.x)*0.58,-120,120);
                   const angles = e.pattern % 2 === 0 ? [-160,-80,0,80,160] : [aimed-32,aimed,aimed+32];
                   angles.forEach(vx => g.enemyShots.push({x:e.x,y:e.y+28,vx,vy:speed+32}));
-                  e.fireCooldown = 0.68;
+                  e.fireCooldown = Math.max(.42,.95-g.elapsed*.0015);
                 }
               }
             } else {
@@ -537,7 +542,7 @@ export default function EndlessShooter({ onExit }) {
           b.x += (b.vx || 0) * dt;
           b.y += b.vy * dt;
         }
-        for (const p of g.pickups) p.y += 105 * dt;
+        for (const p of g.pickups) p.y += (72+Math.min(60,g.elapsed*.17))*dt;
         for (const b of g.shots) {
           if (b.dead) continue;
           for (const e of g.enemies) {
@@ -558,14 +563,23 @@ export default function EndlessShooter({ onExit }) {
             Math.abs(pickup.y - PY) < 23
           ) {
             pickup.collected = true;
-            g.weaponTier = g.active === pickup.type && g.activeTime > 0 ? 2 : 1;
-            g.active = pickup.type;
-            g.activeTime = POWER[pickup.type].duration + (g.weaponTier === 2 ? 4 : 0);
-            g.weaponFlash = 1.3;
-            g.banner = (g.weaponTier === 2 ? "WEAPON EVOLVED / " : "WEAPON ACQUIRED / ") + POWER[pickup.type].label;
-            g.bannerTime = 1.8;
-            sound(780, 0.16);
-            makeParticles(g, pickup.x, pickup.y, POWER[pickup.type].color, 16);
+            if (pickup.type === "shield") {
+              g.shields = Math.min(2,g.shields+1);
+              g.shieldFlash = 1;
+              g.banner = g.shields === 2 ? "SHIELD / FULLY CHARGED" : "SHIELD / CHARGE ADDED";
+              g.bannerTime = 1.8;
+              sound(930,.13);
+              makeParticles(g,pickup.x,pickup.y,SHIELD.color,19);
+            } else {
+              g.weaponTier = g.active === pickup.type && g.activeTime > 0 ? 2 : 1;
+              g.active = pickup.type;
+              g.activeTime = POWER[pickup.type].duration+(g.weaponTier===2?4:0);
+              g.weaponFlash = 1.3;
+              g.banner = (g.weaponTier===2?"WEAPON EVOLVED / ":"WEAPON ACQUIRED / ")+POWER[pickup.type].label;
+              g.bannerTime = 1.8;
+              sound(780,.16);
+              makeParticles(g,pickup.x,pickup.y,POWER[pickup.type].color,16);
+            }
           }
         }
         g.pickups = g.pickups.filter((p) => !p.collected && p.y < H + 24);
@@ -582,11 +596,22 @@ export default function EndlessShooter({ onExit }) {
               makeParticles(g, enemyCollision.x, enemyCollision.y, "#f49b7b");
             }
             if (shotCollision) shotCollision.hit = true;
-            g.lives--;
-            g.invuln = 1.6;
-            g.shake = Math.max(g.shake, 14);
-            sound(95, 0.24);
-            makeParticles(g, g.shipX, PY, "#ef796b", 20);
+            if(g.shields>0){
+              g.shields--;
+              g.invuln = .95;
+              g.shieldFlash = .9;
+              g.shake = Math.max(g.shake,7);
+              g.banner = "SHIELD IMPACT / HIT ABSORBED";
+              g.bannerTime = 1.2;
+              sound(640,.12);
+              makeParticles(g,g.shipX,PY,SHIELD.color,22);
+            } else {
+              g.lives--;
+              g.invuln = 1.6;
+              g.shake = Math.max(g.shake,14);
+              sound(95,.24);
+              makeParticles(g,g.shipX,PY,"#ef796b",20);
+            }
             if (g.lives <= 0) {
               g.phase = "over";
               g.best = Math.max(g.best, g.score);
@@ -617,6 +642,7 @@ export default function EndlessShooter({ onExit }) {
             active: g.active,
             remaining: Math.max(0, Math.ceil(g.activeTime)),
             tier: g.weaponTier,
+            shields: g.shields,
             boss: g.bossActive,
             bossKills: g.bossKills,
             banner: g.bannerTime > 0 ? g.banner : "",
@@ -706,7 +732,8 @@ export default function EndlessShooter({ onExit }) {
       ctx.fillStyle = "#f48b7c";
       g.enemyShots.forEach((b) => ctx.fillRect(b.x - 2, b.y - 4, 4, 10));
       for (const p of g.pickups) {
-        const color = POWER[p.type].color;
+        const info = pickupInfo(p.type);
+        const color = info.color;
         ctx.fillStyle = "#0e2732";
         ctx.fillRect(p.x - 14, p.y - 14, 28, 28);
         ctx.strokeStyle = color;
@@ -715,7 +742,7 @@ export default function EndlessShooter({ onExit }) {
         ctx.fillStyle = color;
         ctx.textAlign = "center";
         ctx.font = "bold 12px monospace";
-        ctx.fillText(POWER[p.type].symbol, p.x, p.y + 4);
+        ctx.fillText(info.symbol, p.x, p.y + 4);
         ctx.textAlign = "left";
       }
       for (const e of g.effects) {
@@ -747,6 +774,15 @@ export default function EndlessShooter({ onExit }) {
           g.active ? POWER[g.active].color : "#c9e8db",
         );
         drawActiveShipEffect(ctx, g);
+      }
+      if(g.shields>0 || g.shieldFlash>0){
+        const pulse=1+Math.sin(g.elapsed*7)*.045;
+        ctx.save();ctx.translate(g.shipX,PY-2);ctx.scale(pulse,pulse);
+        ctx.strokeStyle=SHIELD.color;ctx.lineWidth=g.shieldFlash>0?4:2;
+        ctx.globalAlpha=.55+Math.min(.4,g.shieldFlash*.42);
+        ctx.beginPath();ctx.arc(0,0,27,0,Math.PI*2);ctx.stroke();
+        if(g.shields>1){ctx.setLineDash([4,5]);ctx.beginPath();ctx.arc(0,0,33,0,Math.PI*2);ctx.stroke();}
+        ctx.restore();
       }
       if(g.bannerTime>0) {
         ctx.fillStyle="rgba(4,12,18,.88)";
@@ -889,6 +925,7 @@ export default function EndlessShooter({ onExit }) {
               : "STANDARD / NONE"}
           </span>
         </div>
+        <div className="mt-2 flex w-full max-w-[480px] items-center justify-between gap-3 border border-[#315b51] bg-[#102c29] px-3 py-2 font-mono text-[10px] tracking-wider"><span className="text-[#9ec8bd]">ENERGY SHIELD</span><span className="text-[#76edc5]">{view.shields>0?"◈ ".repeat(view.shields):"OFFLINE"} <span className="text-[#77988d]">/ 2 CHARGES</span></span></div>
         <div className="mt-2 flex w-full max-w-[480px] items-center justify-between gap-2 font-mono text-[10px] tracking-wide text-[#789d95]"><span>TIME {String(Math.floor(view.time/60)).padStart(2,'0')}:{String(view.time%60).padStart(2,'0')}</span><span>BOSSES DEFEATED {view.bossKills}</span></div>
         <div className="mt-4 w-full max-w-[480px]">
           <div className="flex items-center justify-between gap-3 sm:hidden">
@@ -953,6 +990,7 @@ export default function EndlessShooter({ onExit }) {
               </p>
             </div>
           ))}
+          <div className="border border-[#315b51] px-3 py-2 font-mono text-[10px]"><span style={{color:SHIELD.color}}>◈ {SHIELD.label}</span><p className="mt-1 text-[9px] text-[#7d9d97]">{SHIELD.detail} · Separate from weapons</p></div>
         </div>
       </div>
     </section>
