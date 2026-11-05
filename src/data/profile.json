@@ -2,7 +2,7 @@
   "displayName": "CARL ARTHUR V BUENAVIDEZ",
   "headline": "4th Year BS Information Technology Student",
   "location": "Philippines",
-  "linkedinUrl": "",
+  "linkedinUrl": "https://www.linkedin.com/in/carl-arthur-buenavidez/",
   "photoUrl": "",
   "githubUrl": "https://github.com/mcartv",
   "resumeUrl": "",
@@ -41,5 +41,7 @@
       "image": "/certificates/mw36jnwb-666cd503-aws_cloud_practitioner_essentials.jpg",
       "placeholder": false
     }
-  ]
+  ],
+  "films": [],
+  "email": "buenavidezcarlarthur@gmail.com"
 }

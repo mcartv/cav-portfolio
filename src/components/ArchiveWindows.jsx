@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Clapperboard, Grip, X } from 'lucide-react'
 import { profile } from '../data/profile'
+import FilmArchive from './FilmArchive'
 
 function usePanelFocus(open, onClose) {
   const panelRef = useRef(null)
@@ -82,23 +83,11 @@ export function FilmWindow({ open, onClose }) {
   const panelRef = usePanelFocus(open, onClose)
   return (
     <div className={'drawer-layer film-layer ' + (open ? 'is-open' : '')} aria-hidden={!open}>
-      <div className="drawer-scrim" onClick={onClose} aria-hidden="true" />
+      <div className="drawer-scrim" onClick={onClose} aria-hidden="true"/>
       <section ref={panelRef} inert={!open ? true : undefined} role="dialog" aria-modal="true" aria-labelledby="film-window-title"
-        className="drawer-surface film-window flex h-full w-full flex-col bg-[#080809] text-[#f1f0ec]">
-        <PanelHeader eyebrow="02 / THE OTHER PRACTICE" title="THE CINEMA ARCHIVE" onClose={onClose} />
-        <div className="film-window-content relative flex flex-1 flex-col justify-center overflow-y-auto px-[7%] py-14 sm:px-[10%]">
-          <div className="film-grid pointer-events-none absolute inset-0 opacity-20" aria-hidden="true" />
-          <div className="relative max-w-5xl">
-            <div className="mb-8 flex items-center gap-3 font-mono text-[10px] tracking-[.25em] text-[#ff443f]"><Clapperboard size={18} /> [ ACCESS / NOT QUITE YET ]</div>
-            <div className="film-glitch mb-7 font-black leading-[.86] tracking-[-.085em] text-[#fa423b]" id="film-window-title">NOT EVERY<br />FRAME IS<br /><span className="font-serif font-normal italic">READY.</span></div>
-            <p className="max-w-xl border-l-2 border-[#fa423b] pl-5 text-base leading-[1.8] text-[#e3e0dc] sm:text-xl">Some stories deserve the right light, the right moment, and a little more time before they're shown.</p>
-            <p className="mt-8 font-mono text-xs tracking-wide text-[#fa423b]">THE FILM ARCHIVE IS STILL IN DEVELOPMENT_</p>
-            <div className="mt-12 border-t border-white/30 pt-7"><p className="font-serif text-2xl italic sm:text-4xl">How did you get in here anyway?</p>
-              <button type="button" onClick={onClose} className="mt-6 inline-flex items-center gap-3 bg-[#fa423b] px-6 py-4 font-mono text-xs font-semibold text-[#100b0a] transition-transform hover:-translate-y-1">TAKE ME BACK TO IT <ArrowRight size={17} /></button>
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-between gap-3 border-t border-white/25 px-5 py-4 font-mono text-[9px] text-white/50 sm:px-9"><span>FILM / VOL. 00</span><span>END OF PREVIEW — FOR NOW</span></div>
+        className="drawer-surface film-window flex h-full w-full flex-col overflow-hidden bg-[#0d0d0e] text-[#eee8de]">
+        <PanelHeader eyebrow="02 / THE OTHER PRACTICE" title="THE CINEMA ARCHIVE" onClose={onClose}/>
+        <FilmArchive open={open} onClose={onClose}/>
       </section>
     </div>
   )
