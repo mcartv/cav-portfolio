@@ -61,6 +61,27 @@
     "placeholder": false
   },
   {
+    "id": "04",
+    "slug": "welead",
+    "title": "WeLead",
+    "type": "FULL-STACK / PROJECT MANAGEMENT",
+    "year": "—",
+    "color": "#D8D5C9",
+    "light": "#F2F0E8",
+    "description": "A project and client management platform for coordinating work, inquiries, and consultations.",
+    "summary": "WeLead is a web-based management platform with user authentication, role-restricted administrator and member areas, project planning and tracking, client inquiry review, portfolio gallery management, and consultation scheduling. Its interface brings project workflows and client-facing operations together in one place.",
+    "stack": [
+      "React",
+      "React Router",
+      "Firebase Data Connect",
+      "React Hook Form",
+      "React Icons"
+    ],
+    "mark": "WL",
+    "link": "https://github.com/mcartv/WeLead",
+    "placeholder": false
+  },
+  {
     "slug": "coming-soon",
     "title": "More projects to come",
     "type": "THE NEXT CHAPTER",
@@ -73,6 +94,6 @@
     "mark": "…",
     "link": null,
     "placeholder": true,
-    "id": "04"
+    "id": "05"
   }
 ]
