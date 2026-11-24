@@ -414,15 +414,20 @@ export default async function handler(req, res) {
         });
       const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
       const kind =
-        file.kind === "project"
-          ? "project"
+        file.kind === "project" || file.kind === "film"
+          ? file.kind
           : file.kind === "certificate" || file.kind == null
             ? "certificate"
             : null;
       if (!kind) return response(res, 400, { error: "Invalid image category" });
+      const directory = {
+        certificate: "certificates",
+        project: "projects",
+        film: "films",
+      }[kind];
       const path =
         "public/" +
-        (kind === "project" ? "projects" : "certificates") +
+        directory +
         "/" +
         Date.now().toString(36) +
         "-" +
