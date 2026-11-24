@@ -7,6 +7,7 @@ import {
   Asterisk,
   Github,
   Linkedin,
+  Mail,
   Menu,
   X,
 } from "lucide-react";
@@ -20,6 +21,10 @@ import {
 import ArcadeHub from "./components/ArcadeHub";
 import ProjectGallery from "./components/ProjectGallery";
 import Magnetic from "./components/Magnetic";
+
+const gmailComposeUrl = (email) =>
+  "https://mail.google.com/mail/?view=cm&fs=1&to=" +
+  encodeURIComponent(email || "buenavidezcarlarthur@gmail.com");
 
 const skills = [
   { number: "01", category: "FRONTEND", items: "React, JavaScript, HTML, CSS" },
@@ -394,7 +399,10 @@ function About({ onCertificatesOpen }) {
             {profile.email && (
               <a
                 className="inline-flex items-center gap-2 border-b border-ink pb-2 font-mono text-[11px] hover:text-signal"
-                href={"mailto:" + profile.email}
+                href={gmailComposeUrl(profile.email)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Compose an email in Gmail"
               >
                 EMAIL <ArrowUpRight size={13} />
               </a>
@@ -1365,10 +1373,7 @@ function Contact() {
       </p>
       <a
         className="contact-headline editorial-heading mt-5 block text-[clamp(68px,13.5vw,190px)]"
-        href={
-          "https://mail.google.com/mail/?view=cm&fs=1&to=" +
-          encodeURIComponent(profile.email || "buenavidezcarlarthur@gmail.com")
-        }
+        href={gmailComposeUrl(profile.email)}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Compose an email in Gmail"
@@ -1391,6 +1396,15 @@ function Contact() {
           rel="noreferrer"
         >
           <Linkedin size={15} /> LINKEDIN ↗
+        </a>
+        <a
+          className="inline-flex items-center gap-1 hover:underline"
+          href={gmailComposeUrl(profile.email)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Email Carl Arthur Buenavidez in Gmail"
+        >
+          <Mail size={15} /> EMAIL ↗
         </a>
         <a className="hover:underline" href="#home">
           BACK TO TOP ↑
