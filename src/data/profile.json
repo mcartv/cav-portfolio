@@ -40,6 +40,24 @@
       "url": "/certificates/mw1ys3ab-93364afd-aws_cloud_practitioner_essentials.jpg",
       "image": "/certificates/mw36jnwb-666cd503-aws_cloud_practitioner_essentials.jpg",
       "placeholder": false
+    },
+    {
+      "label": "COURSE",
+      "title": "Linux Unhatched",
+      "issuer": "Cisco Networking Academy",
+      "date": "",
+      "image": "/certificates/mwus313g-ea3a7b4b-linuxunhatchedupdate20250515-26-4m4vmv_page-0001.jpg",
+      "url": "/certificates/mwus313g-ea3a7b4b-linuxunhatchedupdate20250515-26-4m4vmv_page-0001.jpg",
+      "placeholder": false
+    },
+    {
+      "label": "COURSE",
+      "title": "Introduction to CSS",
+      "issuer": "Technical Education and Skills Development Authority",
+      "date": "",
+      "image": "/certificates/mwus44zy-9d0b649e-certificate_of_completion_page-0001.jpg",
+      "url": "/certificates/mwus44zy-9d0b649e-certificate_of_completion_page-0001.jpg",
+      "placeholder": false
     }
   ],
   "films": [],
